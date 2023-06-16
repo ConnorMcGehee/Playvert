@@ -2,11 +2,12 @@ import { Link } from "react-router-dom";
 import "../css/Nav.css"
 import logo from "../assets/logo.png";
 
-interface NavProps {
-    isLoggedIn: boolean
-}
+// interface NavProps {
+//     isLoggedIn: boolean
+// }
 
-function Nav({ isLoggedIn }: NavProps) {
+// function Nav({ isLoggedIn }: NavProps) {
+function Nav() {
 
     return (
         <div id="nav-container">

@@ -49,7 +49,7 @@ function App() {
   }, [isLoggedIn])
   return (
     <BrowserRouter>
-      <Nav isLoggedIn={isLoggedIn} />
+      <Nav />
       <main>
         <Routes>
           <Route path="/" element={<Dashboard />} />
