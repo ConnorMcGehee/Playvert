@@ -48,8 +48,7 @@ const config = {
 
 app.use(auth(config));
 
-// Initialize client.
-const redisClient = createClient({
+const createRedisClient = () => createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
     host: 'redis-18789.c124.us-central1-1.gce.cloud.redislabs.com',
@@ -57,15 +56,19 @@ const redisClient = createClient({
   }
 });
 
-redisClient.on('connect', () => {
-  console.log('Connected to Redis successfully.');
-});
-
 const maxRetries = 5;
 let retryCount = 0;
 
+let redisClient;
+
 const connectWithRetry = () => {
   console.log(`Attempting to connect to Redis (attempt ${retryCount + 1} of ${maxRetries})...`);
+
+  redisClient = createRedisClient();
+
+  redisClient.on('connect', () => {
+    console.log('Connected to Redis successfully.');
+  });
 
   redisClient.connect()
     .then(() => {
@@ -80,7 +83,7 @@ const connectWithRetry = () => {
         // Wait 1 second before attempting to reconnect
         setTimeout(connectWithRetry, 1000);
       } else {
-        console.error('Failed to connect to Redis after multiple attempts.');
+        console.error(`Failed to connect to Redis after ${maxRetries} attempts.`);
       }
     });
 };
