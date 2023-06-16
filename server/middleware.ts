@@ -42,9 +42,11 @@ export async function spotifyRefreshToken(req: Request, res: Response, next: Nex
             if (error instanceof HTTPError) {
                 console.error('Error refreshing token:', error.response.body);
                 if (!error.response.body) {
-                    throw new Error("Unknown error");
+                    next();
+                    return res.send("Unknown error");
                 }
                 if (JSON.parse(error.response.body.toString()).error_description.includes("refresh_token must be suppled")) {
+                    next();
                     return res.status(401).send("Not authenticated");
                 }
             } else {

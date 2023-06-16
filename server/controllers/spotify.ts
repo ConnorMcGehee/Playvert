@@ -149,6 +149,8 @@ export const getUserPlaylists = async (req: Request, res: Response) => {
 export const getPlaylist = async (req: Request, res: Response) => {
     let token = req.session.spotify_access_token;
 
+    console.log("token:", token)
+
     if (!token) {
         const authOptions = {
             headers: {
@@ -161,7 +163,9 @@ export const getPlaylist = async (req: Request, res: Response) => {
         };
 
         const body: { access_token: string } = await got.post("https://accounts.spotify.com/api/token", authOptions).json();
+
         token = body.access_token;
+        console.log("new token:", token)
     }
 
     const options = {
