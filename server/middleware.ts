@@ -50,7 +50,8 @@ export async function spotifyRefreshToken(req: Request, res: Response, next: Nex
             } else {
                 console.error('Error refreshing token:', error);
             }
-            throw error;
+            next();
+            return;
         }
     } else {
         next();
