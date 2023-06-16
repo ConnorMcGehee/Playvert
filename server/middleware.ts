@@ -39,6 +39,7 @@ export async function spotifyRefreshToken(req: Request, res: Response, next: Nex
             next();
         }
         catch (error) {
+            delete req.session.spotify_access_token;
             if (error instanceof HTTPError) {
                 console.error('Error refreshing token:', error.response.body);
                 if (!error.response.body) {

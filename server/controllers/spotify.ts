@@ -76,7 +76,8 @@ export const getLoginStatus = (req: Request, res: Response) => {
         return res.json({ isLoggedIn });
     }
     catch (error) {
-        throw error;
+        console.error(error);
+        return res.send(error);
     }
 }
 
@@ -84,16 +85,16 @@ export const authorize = async (req: Request, res: Response) => {
     const error = req.query.error;
     const code = req.query.code?.toString();
     if (!code) {
-        throw new Error("Error: " + error);
+        return res.send("Error: " + error);
     }
     const returnState = req.query.state;
 
     if (returnState !== STATE) {
-        throw new Error("Mismatched state");
+        return res.send("Mismatched state");
     }
 
     if (error) {
-        throw new Error(`Callback Error: ${error}`);
+        return res.send(`Callback Error: ${error}`);
     }
 
     const options = {
@@ -126,7 +127,8 @@ export const authorize = async (req: Request, res: Response) => {
         return res.redirect("/");
     }
     catch (error) {
-        throw error;
+        console.error(error);
+        return res.send(error);
     }
 }
 
@@ -174,11 +176,12 @@ export const getPlaylist = async (req: Request, res: Response) => {
         }
     }
     try {
-        const data: SpotifyAPIResponse = await got(`https://api.spotify.com/v1/playlists/${req.params.id}`, options).json()
+        const data: SpotifyAPIResponse = await got(`https://api.spotify.com/v1/playlists/${req.params.id}`, options).json();
         return res.json(data);
     }
     catch (error) {
-        throw error;
+        console.error(error);
+        return res.send(error);
     }
 }
 
@@ -211,7 +214,8 @@ export const getPlaylistSongs = async (req: Request, res: Response) => {
         return res.json(data.items);
     }
     catch (error) {
-        throw error;
+        console.error(error);
+        return res.send(error);
     }
 }
 
