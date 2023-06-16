@@ -61,10 +61,32 @@ redisClient.on('connect', () => {
   console.log('Connected to Redis successfully.');
 });
 
-redisClient.connect()
-  .catch((error) => {
-    console.error("Redis connection error:", error)
-  });
+const maxRetries = 5;
+let retryCount = 0;
+
+const connectWithRetry = () => {
+  console.log(`Attempting to connect to Redis (attempt ${retryCount + 1} of ${maxRetries})...`);
+
+  redisClient.connect()
+    .then(() => {
+      console.log('Connected to Redis successfully.');
+    })
+    .catch((error) => {
+      console.error('Redis connection error:', error);
+
+      retryCount++;
+
+      if (retryCount < maxRetries) {
+        // Wait 1 second before attempting to reconnect
+        setTimeout(connectWithRetry, 1000);
+      } else {
+        console.error('Failed to connect to Redis after multiple attempts.');
+      }
+    });
+};
+
+connectWithRetry();
+
 
 // Initialize store.
 let redisStore = new RedisStore({
