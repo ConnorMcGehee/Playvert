@@ -1,0 +1,32 @@
+#nav-container {
+    margin: 1rem 0;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+}
+
+#nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    width: clamp(17rem, 100%, 70rem);
+    max-width: 90rem;
+    margin: auto;
+    box-sizing: border-box;
+}
+
+#logo {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#nav-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: end;
+    gap: 2rem;
+}

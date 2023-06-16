@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "nodemon server.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/express-session": "^1.17.7",
+    "@types/node": "^20.3.1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.347.0",
+    "@aws-sdk/lib-dynamodb": "^3.353.0",
+    "connect-redis": "^7.1.0",
+    "dotenv": "^16.1.4",
+    "express": "^4.18.2",
+    "express-openid-connect": "^2.16.0",
+    "express-session": "^1.17.3",
+    "got": "^13.0.0",
+    "nodemon": "^2.0.22",
+    "redis": "^4.6.7",
+    "short-uuid": "^4.2.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.3"
+  }
+}

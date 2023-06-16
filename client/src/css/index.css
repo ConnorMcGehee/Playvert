@@ -1,0 +1,150 @@
+:root {
+  --background-color: rgb(241, 245, 242);
+  --font-color: #063816;
+  --link-color: #1a6e53;
+  --link-hover-color: #38ac84;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  font-family: 'Red Hat Display', sans-serif;
+  color: var(--font-color);
+}
+
+main {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: clamp(17rem, 100%, 70rem);
+  max-width: 90rem;
+  margin: auto;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--link-color);
+}
+
+h2 {
+  margin: 0;
+  margin-top: 1rem;
+  background-color: #064210;
+  color: white;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+h2 a, h2 a:visited {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  border: 0.1rem solid #91c6a9;
+  padding: 1rem;
+  font-size: 1.3rem;
+  width: fit-content;
+  background: rgb(223, 223, 223);
+  background: linear-gradient(326deg, rgb(97, 182, 123) 0%, rgb(195, 241, 208) 100%);
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0.1rem 0.25rem #064210;
+}
+
+@media (hover:hover) {
+  a:hover {
+    color: var(--link-hover-color);
+    text-shadow: 0 0 0.25rem #a6eac455;
+  }
+  
+  h2 a:hover {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  button:hover {
+    background: rgb(255, 255, 255);
+    background: linear-gradient(326deg, rgb(87, 172, 113) 0%, rgb(185, 231, 197) 100%);
+  }
+}
+
+button:active {
+  background: rgb(255, 255, 255);
+  background: linear-gradient(326deg, rgb(141, 222, 179) 0%, rgb(140, 199, 162) 100%);
+}
+
+section {
+  text-align: center;
+}
+
+figure {
+  margin: 1rem;
+  width: 9rem;
+  max-height: 20rem;
+  text-overflow: ellipsis;
+}
+
+figcaption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+figure img {
+  width: 100%;
+}
+
+.small {
+  font-size: 0.8rem;
+  max-height: 2rem;
+}
+
+h4 {
+  font-size: 0.96rem;
+  margin: 0.5rem;
+  margin-bottom: 0.25rem;
+  max-height: 2rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.playlist-data {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.small-icon {
+  font-size: 1.5rem;
+  width: 2rem;
+}
+
+.fa-spotify {
+  color: #1cd760;
+}
+
+.fa-deezer {
+  color: #972787;
+}
+
+.fa-itunes-note {
+  color: #fa233d;
+}
+
+.loading-status {
+  text-align: center;
+  margin: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+progress {
+  display: block;
+}

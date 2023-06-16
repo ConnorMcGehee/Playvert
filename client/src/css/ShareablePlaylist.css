@@ -1,0 +1,50 @@
+.share-link {
+    font-family: "Red Hat Display", sans-serif;
+    align-self: center;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 1rem;
+    border: 0.1rem solid #91c6a9;
+    font-size: 1.3rem;
+    text-align: center;
+    border-radius: var(--border-radius);
+    background-color: rgb(255, 255, 255);
+    color: #0f5833;
+    width: clamp(8rem, 80vw, 40rem);
+    margin: 1rem;
+    margin-bottom: 0;
+}
+
+.save-buttons {
+    margin: 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.playlist-type {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+p {
+    margin: 1rem;
+    text-align: center;
+}
+
+.save-progress {
+    text-align: center;
+    margin: 0 1rem;
+}
+
+.platform-link {
+    justify-content: center;
+    margin: 1rem;
+    margin-bottom: 0;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}

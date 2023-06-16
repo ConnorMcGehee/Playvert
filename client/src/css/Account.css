@@ -1,0 +1,17 @@
+.svg-inline--fa {
+    font-size: 2.5rem;
+    vertical-align: middle;
+    width: 3rem;
+    aspect-ratio: 1;
+}
+
+#account-settings {
+    align-self: start;
+}
+
+.connection {
+    margin: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
