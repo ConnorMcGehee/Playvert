@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "build": "echo 'No build step'",
     "start": "nodemon server.ts"
   },
   "devDependencies": {
