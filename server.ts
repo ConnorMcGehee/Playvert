@@ -61,7 +61,10 @@ redisClient.on('connect', () => {
   console.log('Connected to Redis successfully.');
 });
 
-redisClient.connect().catch(console.error)
+redisClient.connect()
+  .catch((error) => {
+    console.error("Redis connection error:", error)
+  });
 
 // Initialize store.
 let redisStore = new RedisStore({
