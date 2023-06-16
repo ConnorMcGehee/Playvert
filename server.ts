@@ -66,10 +66,6 @@ const connectWithRetry = () => {
 
   redisClient = createRedisClient();
 
-  redisClient.on('connect', () => {
-    console.log('Connected to Redis successfully.');
-  });
-
   redisClient.connect()
     .then(() => {
       console.log('Connected to Redis successfully.');
