@@ -122,7 +122,7 @@ export const authorize = async (req: Request, res: Response) => {
         if (req.session.redirect) {
             let uuid = req.session.redirect;
             delete req.session.redirect;
-            return res.redirect(`/#/playlists/${uuid}/save/${Platform.Spotify}`);
+            return res.redirect(`/playlists/${uuid}/save/${Platform.Spotify}`);
         }
         return res.redirect("/");
     }

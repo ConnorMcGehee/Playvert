@@ -13,7 +13,7 @@ export const createUser = async (req: Request, res: Response) => {
         }
 
         if (!userId) {
-            throw new Error("userId undefined")
+            return res.send("Error: userId undefined");
         }
 
         // Define the item to be written to the DynamoDB table
