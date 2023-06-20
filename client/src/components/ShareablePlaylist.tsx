@@ -95,12 +95,17 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     function disconnectLink() {
         return "/api/spotify/logout";
+
+        // add other disconnect links here
     }
     function disconnectText() {
-        if (typeof playlist.platform !== "undefined") {
-            return `Disconnect from ${Platform[playlist.platform]}`;
-        }
-        return null;
+
+        return `Disconnect from Spotify}`;
+
+        // if (typeof playlist.platform !== "undefined") {
+        //     return `Disconnect from ${Platform[playlist.platform]}`;
+        // }
+        // return null;
     }
 
     function platformText() {
