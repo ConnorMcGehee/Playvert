@@ -253,7 +253,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                         <a href={playlist.playlistUrl} target="_blank">
                             {platformText()}
                         </a>
-                        {isSpotifyConnected && playlist.platform === Platform.Spotify ?
+                        {isSpotifyConnected ?
                             <a href={disconnectLink()}>
                                 {disconnectText()}
                             </a>
