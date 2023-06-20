@@ -12,12 +12,14 @@ function Dashboard() {
     }
 
     return (
-        <div id="dashboard"><form id="search-form" action="">
-            <div id="search-container">
-                <input onInput={(e: ChangeEvent<HTMLInputElement>) => updatePlaylistUrl(e.target.value)} type="search" name="search" id="search" placeholder="Paste playlist link here..." autoFocus />
-                <button onClick={(e) => convertPlaylist(e)} id="convert">Convert!</button>
-            </div>
-        </form>
+        <div id="dashboard">
+            <form id="search-form" action="">
+                <div id="search-container">
+                    <input onInput={(e: ChangeEvent<HTMLInputElement>) => updatePlaylistUrl(e.target.value)} type="search" name="search" id="search" placeholder="Paste playlist link here..." autoFocus />
+                    <button onClick={(e) => convertPlaylist(e)} id="convert">Convert!</button>
+                </div>
+            </form>
+                Enter a playlist link from Spotify, Apple Music, or Deezer to get started.
         </div>
     )
 }
