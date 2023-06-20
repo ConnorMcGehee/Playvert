@@ -121,6 +121,7 @@ declare module 'express-session' {
     spotify_refresh_token: string;
     spotify_token_expiration_time: number;
     redirect?: string;
+    state?: string;
   }
 }
 

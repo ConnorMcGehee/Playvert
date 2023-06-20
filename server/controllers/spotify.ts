@@ -42,18 +42,18 @@ const generateRandomString = function (length = 16) {
     return text;
 };
 
-const STATE = generateRandomString();
-
 export const login = (req: Request, res: Response) => {
-
     let { uuid } = req.params;
+
+    const state = generateRandomString();
+    req.session.state = state;
 
     const params = new URLSearchParams({
         response_type: "code",
         client_id: SPOTIFY_CLIENT_ID,
         scope: SCOPE,
         redirect_uri: REDIRECT_URI,
-        state: STATE,
+        state: state,
         show_dialog: "true"
     })
     if (uuid) {
@@ -61,6 +61,7 @@ export const login = (req: Request, res: Response) => {
     }
     return res.redirect('https://accounts.spotify.com/authorize?' + params);
 }
+
 
 export const logout = (req: Request, res: Response) => {
     req.session.spotify_access_token = "";
@@ -89,9 +90,11 @@ export const authorize = async (req: Request, res: Response) => {
     }
     const returnState = req.query.state;
 
-    if (returnState !== STATE) {
+    if (returnState !== req.session.state) {
         return res.send("Mismatched state");
     }
+
+    delete req.session.state;
 
     if (error) {
         return res.send(`Callback Error: ${error}`);
