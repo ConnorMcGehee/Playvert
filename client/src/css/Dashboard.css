@@ -10,6 +10,7 @@
     margin: auto;
     width: clamp(17rem, 100%, 70rem);
     max-width: 90rem;
+    text-align: center;
 }
 
 #search-form {

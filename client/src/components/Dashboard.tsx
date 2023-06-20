@@ -19,7 +19,7 @@ function Dashboard() {
                     <button onClick={(e) => convertPlaylist(e)} id="convert">Convert!</button>
                 </div>
             </form>
-                Enter a playlist link from Spotify, Apple Music, or Deezer to get started.
+            <p>Enter a playlist link from Spotify, Apple Music, or Deezer to get started.</p>
         </div>
     )
 }
