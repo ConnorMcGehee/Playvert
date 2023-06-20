@@ -100,7 +100,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
     }
     function disconnectText() {
 
-        return `Disconnect from Spotify}`;
+        return `Disconnect from Spotify`;
 
         // if (typeof playlist.platform !== "undefined") {
         //     return `Disconnect from ${Platform[playlist.platform]}`;
