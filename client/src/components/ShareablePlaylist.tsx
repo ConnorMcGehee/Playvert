@@ -28,12 +28,8 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
     async function saveToSpotify() {
         setPlatform(Platform.Spotify);
         setSaveStatus(-1);
-        let loggedIn = false;
-        await fetch("/api/spotify/login-status")
-            .then(res => res.json())
-            .then((data) => {
-                loggedIn = data.isLoggedIn;
-            });
+
+        let loggedIn = await checkSpotifyLoginStatus();
 
         if (!loggedIn) {
             window.location.replace(`/api/spotify/login/${id}`);
@@ -153,13 +149,16 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         }
     }, [newPlaylist]);
 
-    function checkSpotifyLoginStatus() {
-        fetch("/api/spotify/login-status")
-            .then(res => res.json())
-            .then((isLoggedIn: boolean) => {
-                setSpotifyConnected(isLoggedIn);
-            });
-
+    async function checkSpotifyLoginStatus() {
+        const isLoggedIn = await new Promise<boolean>((resolve) => {
+            fetch("/api/spotify/login-status")
+                .then(res => res.json())
+                .then((isLoggedIn: boolean) => {
+                    setSpotifyConnected(isLoggedIn);
+                    resolve(isLoggedIn);
+                })
+        });
+        return isLoggedIn;
     }
 
     useEffect(() => {
