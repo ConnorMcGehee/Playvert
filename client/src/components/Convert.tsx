@@ -94,7 +94,7 @@ function Convert() {
             const match = playlistUrl.match(regex);
             const id = match ? match[1] : "";
             newPlaylist.platform = Platform.Apple;
-            await fetch(`/api/apple/playlists/${id}`)
+            await Promise.all([fetch(`/api/apple/playlists/${id}`)
                 .then(res => res.json())
                 .then(async data => {
                     const playlistData = data.data[0];
@@ -118,52 +118,44 @@ function Convert() {
                         imageUrl: imageUrl,
                         playlistUrl: playlistUrl,
                         platform: Platform.Apple
-                    }));
-                    const promises = playlistData.relationships.tracks.data.map(async (track: { id: number; }) => {
-                        const res = await fetch(`/api/apple/tracks/${track.id}`);
-                        const updatedTrack = await res.json();
-                        return updatedTrack;
-                    });
-
-                    await Promise.all(promises)
-                        .then(async (tracks) => {
-                            setLoadingStatus(`Getting song and artist info from Apple Music...`);
-                            for (let data of tracks) {
-                                const track = data.data[0];
-                                const artistPromises = track.relationships.artists.data.map(async (artistData: { id: number; }) => {
-                                    const id = artistData.id;
-                                    const name = await fetch(`/api/apple/artists/${id}`)
-                                        .then(res => res.json())
-                                        .then((data): string => {
-                                            const artist = data.data[0];
-                                            return artist.attributes.name
-                                        })
-                                    return name;
-                                });
-                                const artists = await Promise.all(artistPromises);
-                                const coverArtUrl = track.attributes.artwork.url.replace("{w}", "700").replace("{h}", "700");
-                                newPlaylist.tracks.push({
-                                    id: track.id,
-                                    isrc: track.attributes.isrc,
-                                    title: track.attributes.name,
+                    }))
+                }), fetch(`/api/apple/playlists/${id}/tracks`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const tracks = data.data;
+                        for (let track of tracks) {
+                            const trackId = track.id;
+                            const isrc = track.attributes.isrc;
+                            const title = track.attributes.name;
+                            const artistsData = track.relationships.artists.data;
+                            const coverArtUrl = track.attributes.artwork.url.replace("{w}", "700").replace("{h}", "700");
+                            const linkToSong = track.attributes.url;
+                            const artists = artistsData.map((artist: { attributes: { name: string; }; }) => {
+                                return artist.attributes.name;
+                            });
+                            newPlaylist.tracks.push({
+                                id: trackId,
+                                isrc: isrc,
+                                title: title,
+                                artists: artists,
+                                coverArtUrl: coverArtUrl,
+                                linkToSong: linkToSong
+                            });
+                            setPlaylist(prevPlaylist => ({
+                                ...prevPlaylist,
+                                tracks: [...prevPlaylist.tracks, {
+                                    id: trackId,
+                                    isrc: isrc,
+                                    title: title,
                                     artists: artists,
                                     coverArtUrl: coverArtUrl,
-                                    linkToSong: track.attributes.url
-                                });
-                                setPlaylist(prevPlaylist => ({
-                                    ...prevPlaylist,
-                                    tracks: [...prevPlaylist.tracks, {
-                                        id: track.id,
-                                        isrc: track.attributes.isrc,
-                                        title: track.attributes.name,
-                                        artists: artists,
-                                        coverArtUrl: coverArtUrl,
-                                        linkToSong: track.attributes.url
-                                    }]
-                                }));
-                            }
-                        });
-                })
+                                    linkToSong: linkToSong
+                                }]
+                            }));
+
+                        }
+                    })
+            ])
                 .catch(() => {
                     setLoadingStatus(NoPlaylistFoundMsg);
                 });
@@ -284,7 +276,7 @@ function Convert() {
                 <h3 className="loading-status">{loadingStatus}</h3>
             </>
                 : null}
-            {playlist.title ? <ShareablePlaylist newPlaylist={playlist} newId={uuid} />
+            {playlist.title ? <ShareablePlaylist newPlaylist={playlist} newId={uuid} isConverting={true} />
                 : null}
         </>
     )

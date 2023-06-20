@@ -9,10 +9,11 @@ import { faCircleCheck, faCircleExclamation } from "@fortawesome/free-solid-svg-
 
 interface ShareablePlaylistProps {
     newPlaylist?: Playlist,
-    newId?: string
+    newId?: string,
+    isConverting?: boolean
 }
 
-function ShareablePlaylist({ newPlaylist, newId }: ShareablePlaylistProps) {
+function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: ShareablePlaylistProps) {
     const params = useParams();
     const id = params.id || newId;
     const savePlatform = params.platform || "";
@@ -22,6 +23,7 @@ function ShareablePlaylist({ newPlaylist, newId }: ShareablePlaylistProps) {
     const [notFound, setNotFound] = useState(false);
     const [saveStatus, setSaveStatus] = useState(0);
     const [platform, setPlatform] = useState<Platform>();
+    const [isSpotifyConnected, setSpotifyConnected] = useState(false);
 
     async function saveToSpotify() {
         setPlatform(Platform.Spotify);
@@ -151,6 +153,19 @@ function ShareablePlaylist({ newPlaylist, newId }: ShareablePlaylistProps) {
         }
     }, [newPlaylist]);
 
+    function checkSpotifyLoginStatus() {
+        fetch("/api/spotify/login-status")
+            .then(res => res.json())
+            .then((isLoggedIn: boolean) => {
+                setSpotifyConnected(isLoggedIn);
+            });
+
+    }
+
+    useEffect(() => {
+        checkSpotifyLoginStatus();
+    }, [])
+
     let startedSave = false;
     useEffect(() => {
         if (savePlatform && !startedSave && playlist.tracks.length > 0) {
@@ -239,9 +254,11 @@ function ShareablePlaylist({ newPlaylist, newId }: ShareablePlaylistProps) {
                         <a href={playlist.playlistUrl} target="_blank">
                             {platformText()}
                         </a>
-                        <a href={disconnectLink()}>
-                            {disconnectText()}
-                        </a>
+                        {isSpotifyConnected && playlist.platform === Platform.Spotify ?
+                            <a href={disconnectLink()}>
+                                {disconnectText()}
+                            </a>
+                            : null}
                     </div>
                     {<section className="playlist-data">
                         {playlist.tracks.map((track) => {
@@ -276,10 +293,12 @@ function ShareablePlaylist({ newPlaylist, newId }: ShareablePlaylistProps) {
             )
                 : notFound ? <p><FontAwesomeIcon icon={faFaceFrownOpen} style={{ fontSize: "1.5rem" }} /><br /><br />
                     The playlist you're looking for doesn't exist or has expired.</p>
-                    : <>
-                        <p>Loading...</p>
-                        <progress />
-                    </>
+                    : isConverting ?
+                        null
+                        : <>
+                            <p>Loading...</p>
+                            <progress />
+                        </>
             }
         </>
     )

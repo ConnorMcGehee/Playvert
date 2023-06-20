@@ -73,7 +73,7 @@ export const logout = (req: Request, res: Response) => {
 export const getLoginStatus = (req: Request, res: Response) => {
     try {
         const isLoggedIn = !!req.session.spotify_access_token; // Check if the access_token is present in the session
-        return res.json({ isLoggedIn });
+        return res.json(isLoggedIn);
     }
     catch (error) {
         console.error(error);

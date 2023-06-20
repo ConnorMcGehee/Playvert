@@ -20,7 +20,7 @@ export const getPlaylist = async (req: Request, res: Response) => {
     }
     const playlistId = req.params.id;
     try {
-        const data: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/playlists/${playlistId}?include=tracks,artists`, options).json()
+        const data: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/playlists/${playlistId}`, options).json()
         return res.json(data);
     } catch (error) {
         return res.send(error);
@@ -36,7 +36,7 @@ export const getPlaylistTracks = async (req: Request, res: Response) => {
     }
     const playlistId = req.params.id;
     try {
-        const data: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/playlists/${playlistId}/tracks`, options).json()
+        const data: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/playlists/${playlistId}/tracks?include=artists`, options).json()
         return res.json(data);
     } catch (error) {
         return res.send(error);

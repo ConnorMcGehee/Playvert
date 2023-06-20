@@ -2,7 +2,7 @@ import Nav from "./Nav"
 import Dashboard from './Dashboard'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import NotFound from "./NotFound"
-import { useState, useEffect } from "react"
+//import { useState, useEffect } from "react"
 import ShareablePlaylist from "./ShareablePlaylist"
 import Convert from "./Convert"
 
@@ -36,17 +36,17 @@ export class Playlist {
 }
 
 function App() {
-  const [isLoggedIn, setLoginStatus] = useState(false);
-  async function fetchAuthData() {
-    await fetch("/auth")
-      .then(res => res.json())
-      .then((fetchIsLoggedIn: boolean) => {
-        setLoginStatus(fetchIsLoggedIn);
-      });
-  }
-  useEffect(() => {
-    fetchAuthData();
-  }, [isLoggedIn])
+  // const [isLoggedIn, setLoginStatus] = useState(false);
+  // async function fetchAuthData() {
+  //   await fetch("/auth")
+  //     .then(res => res.json())
+  //     .then((isLoggedIn: boolean) => {
+  //       setLoginStatus(isLoggedIn);
+  //     });
+  // }
+  // useEffect(() => {
+  //   fetchAuthData();
+  // }, [isLoggedIn])
   return (
     <BrowserRouter>
       <Nav />
