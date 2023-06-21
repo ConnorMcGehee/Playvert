@@ -4,7 +4,7 @@ import * as controller from "../controllers/apple.js";
 export const router = express.Router();
 export const path = "/api/apple";
 
-router.post("/login", controller.login);
+router.get("/login", controller.login);
 router.get("/callback", controller.authorize);
 router.get("/playlists/:id", controller.getPlaylist);
 router.get("/playlists/:id/tracks", controller.getPlaylistTracks);
