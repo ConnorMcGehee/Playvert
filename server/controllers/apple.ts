@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import got from "got";
+import { generateRandomString } from "../../server.ts";
+import { json } from "stream/consumers";
 
 interface AppleAPIResponse {
     data: {}[],
@@ -11,6 +13,43 @@ interface AppleAPIResponse {
 }
 
 const APPLE_DEV_TOKEN = process.env.APPLE_DEV_TOKEN;
+const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || "";
+const APPLE_CLIENT_SECRET = process.env.APPLE_CLIENT_SECRET;
+const redirectUri = "https://playvert/com/api/apple/callback`;"
+
+export const login = (req: Request, res: Response) => {
+    const appleAuthUrl = new URL('https://appleid.apple.com/auth/authorize');
+
+    const state = generateRandomString();
+    req.session.state = state;
+
+    appleAuthUrl.searchParams.append('response_type', 'code');
+    appleAuthUrl.searchParams.append('client_id', APPLE_CLIENT_ID);
+    appleAuthUrl.searchParams.append('redirect_uri', redirectUri);
+    appleAuthUrl.searchParams.append('state', state);
+
+    // Redirect the user to Apple's authorization page
+    return res.redirect(appleAuthUrl.toString());
+}
+
+export const authorize = async (req: Request, res: Response) => {
+    const authorizationCode = req.query.code;
+
+    const tokenEndpoint = 'https://appleid.apple.com/auth/token';
+
+    const form = {
+        client_id: APPLE_CLIENT_ID,
+        client_secret: APPLE_CLIENT_SECRET,
+        code: authorizationCode,
+        grant_type: 'authorization_code',
+    };
+
+    const data = await got.post(tokenEndpoint, {
+        form: form
+    }).json();
+
+    return res.json(data);
+}
 
 export const getPlaylist = async (req: Request, res: Response) => {
     const options = {
