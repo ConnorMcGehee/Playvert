@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "build": "echo 'No build step'",
+    "build": "npm --prefix ./client run build",
     "start": "nodemon server.ts"
   },
   "devDependencies": {
