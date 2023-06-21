@@ -9,6 +9,8 @@ import { createClient } from "redis"
 import { auth } from 'express-openid-connect';
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 
+console.log("Starting up...")
+
 dotenv.config();
 
 const isProductionEnv = process.env.ENVIRONMENT === "prod";
