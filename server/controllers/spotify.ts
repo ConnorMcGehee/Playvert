@@ -1,6 +1,6 @@
 import got from "got";
 import { Request, Response } from "express";
-import { Platform, baseUrl } from "../../server.ts";
+import { Platform, baseUrl, generateRandomString } from "../../server.ts";
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || "";
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || "";
@@ -31,16 +31,6 @@ const SCOPE_ARRAY = ["ugc-image-upload",
     "user-library-modify",
     "user-library-read"];
 const SCOPE = SCOPE_ARRAY.join(" ");
-
-const generateRandomString = function (length = 16) {
-    let text = "";
-    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-};
 
 export const login = (req: Request, res: Response) => {
     let { uuid } = req.params;
