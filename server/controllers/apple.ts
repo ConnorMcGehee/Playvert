@@ -1,13 +1,19 @@
 import { Request, Response } from "express";
 import got from "got";
 import { generateRandomString } from "../../server.ts";
-import { json } from "stream/consumers";
+
+interface Track {
+    attributes: {
+        isrc: string,
+        name: string
+    }
+}
 
 interface AppleAPIResponse {
-    data: {}[],
+    data: Track[],
     results: {
         songs: {
-            data: {}[]
+            data: Track[]
         }
     }
 }
@@ -15,7 +21,11 @@ interface AppleAPIResponse {
 const APPLE_DEV_TOKEN = process.env.APPLE_DEV_TOKEN;
 const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || "";
 const APPLE_CLIENT_SECRET = process.env.APPLE_CLIENT_SECRET;
-const redirectUri = "https://playvert/com/api/apple/callback`;"
+const redirectUri = "https://playvert/com/api/apple/callback"
+
+export const getDevToken = (req: Request, res: Response) => {
+    return res.send(APPLE_DEV_TOKEN);
+}
 
 export const login = (req: Request, res: Response) => {
     try {
@@ -28,9 +38,6 @@ export const login = (req: Request, res: Response) => {
         appleAuthUrl.searchParams.append('client_id', APPLE_CLIENT_ID);
         appleAuthUrl.searchParams.append('redirect_uri', redirectUri);
         appleAuthUrl.searchParams.append('state', state);
-
-
-        console.log(appleAuthUrl.toString());
 
         // Redirect the user to Apple's authorization page
         return res.redirect(appleAuthUrl.toString());
@@ -136,30 +143,68 @@ export const search = async (req: Request, res: Response) => {
     const isrc = req.query.isrc || "";
     const title = req.query.title || "";
     const artist = req.query.artist || "";
-    let tracks: {}[] = [];
+    let tracks: Track[] = [];
     try {
-        if (isrc) {
-            const isrcResponse: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/songs?filter[isrc]=${isrc}`, options).json()
-            tracks = [...isrcResponse.data];
+
+        let term = encodeURI(`${title}+${artist}`.replaceAll(" ", "+"));
+
+        const response: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/search?types=songs&term=${term}&with=topResults`, options).json();
+        tracks = response.results.songs.data;
+
+        tracks.forEach((track, index) => {
+            const trackIsrc = track.attributes.isrc;
+            if (trackIsrc === isrc) {
+                tracks.splice(index, 1);
+                tracks.unshift(track);
+                return;
+            }
+        });
+
+        if (!tracks.length) {
+            const isrcResponse: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/songs?filter[isrc]=${isrc}`, options).json();
+            tracks = [...isrcResponse.data]
         }
-        let terms = title;
-        if (title && artist) {
-            terms = `${title}+${artist}`;
+
+        if (!tracks.length) {
+            console.log("No track found:", term);
         }
-        else if (artist) {
-            terms = artist;
+        else {
+            //  console.log("Track found!", `${term}\n  ${tracks[0].attributes.name}`);
         }
-        if (terms && typeof terms === "string") {
-            const searchParams = new URLSearchParams({
-                types: "songs",
-                term: terms
-            })
-            const trackResponse: AppleAPIResponse = await got(`https://api.music.apple.com/v1/catalog/us/search?${searchParams}`, options).json()
-            tracks = [...tracks, ...trackResponse.results.songs.data];
-        }
+
+        //console.log(tracks.length)
         return res.json(tracks);
     }
     catch (error) {
         return res.send(error);
+    }
+}
+
+export const savePlaylist = async (req: Request, res: Response) => {
+    try {
+        const musicUserToken = req.body.musicUserToken;
+        const body = {
+            attributes: {
+                name: req.body.playlistName
+            },
+            relationships: {
+                tracks: {
+                    data: req.body.tracks
+                }
+            }
+        }
+        const response = await got.post("https://api.music.apple.com/v1/me/library/playlists", {
+            headers: {
+                Authorization: `Bearer ${APPLE_DEV_TOKEN}`,
+                "Music-User-Token": musicUserToken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        return res.status(response.statusCode).send(response.body);
+    }
+    catch (error) {
+        console.error("error:", error)
+        return res.status(400).send(error);
     }
 }

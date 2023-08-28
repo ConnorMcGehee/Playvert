@@ -38,6 +38,8 @@ export const login = (req: Request, res: Response) => {
     const state = generateRandomString();
     req.session.state = state;
 
+    console.log("state:", state);
+
     const params = new URLSearchParams({
         response_type: "code",
         client_id: SPOTIFY_CLIENT_ID,
@@ -79,6 +81,9 @@ export const authorize = async (req: Request, res: Response) => {
         return res.send("Error: " + error);
     }
     const returnState = req.query.state;
+
+    console.log("returnState:", returnState);
+    console.log("session state:", req.session.state);
 
     if (returnState !== req.session.state) {
         return res.send("Mismatched state");

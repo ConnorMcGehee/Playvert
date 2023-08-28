@@ -7,7 +7,8 @@ import RedisStore from "connect-redis"
 import session from "express-session"
 import { createClient } from "redis"
 import { auth } from 'express-openid-connect';
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 console.log("Starting up...")
 
@@ -16,13 +17,15 @@ dotenv.config();
 const isProductionEnv = process.env.ENVIRONMENT === "prod";
 export const baseUrl = isProductionEnv ? "https://playvert.com" : "http://localhost:5173";
 
-export const dynamoDB = new DynamoDB({
+const client = new DynamoDBClient({
   region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!,
     secretAccessKey: process.env.AWS_SECRET_KEY!,
   },
 });
+
+export const dynamoDB = DynamoDBDocumentClient.from(client);
 
 export enum Platform {
   Spotify,
@@ -35,7 +38,7 @@ export const generateRandomString = function (length = 16) {
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (let i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
 };
@@ -63,8 +66,8 @@ app.use(auth(config));
 const createRedisClient = () => createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
-    host: 'redis-18789.c124.us-central1-1.gce.cloud.redislabs.com',
-    port: 18789
+    host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
+    port: 13380
   }
 });
 
@@ -99,7 +102,7 @@ const connectWithRetry = () => {
                 httpOnly: true,
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 sameSite: "none",
-                secure: true
+                secure: isProductionEnv ? true : false
               }
             })
           );

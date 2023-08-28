@@ -42,34 +42,49 @@ export const generateUrl = async (req: Request, res: Response) => {
     // Define the item to be written to the DynamoDB table
     const ttl = Math.floor(Date.now() / 1000) + 24 * 60 * 60; // Current time in seconds + 24 hours
     const item = {
-        linkUuid,
-        playlist,
-        ttl
+        linkUuid: {
+            S: linkUuid.toString()
+        },
+        playlist: {
+            S: JSON.stringify(playlist)
+        },
+        ttl: {
+            N: ttl.toString()
+        }
     };
 
-    // Define the parameters for the Put operation
     const params = {
-        TableName: "PlaylistLinks",
-        Item: item
+        TableName: 'PlaylistLinks',
+        Item: {
+            linkUuid: linkUuid,
+            playlist: playlist,
+            ttl: ttl
+        }
     };
-    // Write the item to the DynamoDB table
-    await dynamoDB.send(new PutCommand(params))
-        .catch(error => console.log("PutError:", error));
 
-    return res.status(201).json(item);
+    await dynamoDB.send(new PutCommand(params));
+    return res.status(200).json({ linkUuid: linkUuid });
 }
 
 export const getPlaylist = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
+
         const params = {
             TableName: "PlaylistLinks",
-            Key: {
-                linkUuid: id
-            }
+            Key: { linkUuid: id }
         };
-        const response = await dynamoDB.send(new GetCommand(params));
-        return res.status(200).json(response.Item);
+
+        dynamoDB.send(new GetCommand(params)).then((data) => {
+            if (data.Item) {
+                const playlist = data.Item;
+                return res.status(200).json(playlist);
+            }
+            else {
+                return res.status(404).json({ message: "Playlist not found" });
+            }
+        });
+
     }
     catch (error) {
         console.error("Error getting item from DynamoDB:", error)

@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { dynamoDB } from "../../server.ts"
-import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { UpdateItemCommand, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -18,7 +16,9 @@ export const createUser = async (req: Request, res: Response) => {
 
         // Define the item to be written to the DynamoDB table
         const item = {
-            userId
+            userId: {
+                S: userId
+            }
         };
 
         // Define the parameters for the Put operation
@@ -28,7 +28,7 @@ export const createUser = async (req: Request, res: Response) => {
         };
 
         // Write the item to the DynamoDB table
-        await dynamoDB.send(new PutCommand(params));
+        await dynamoDB.send(new PutItemCommand(params));
 
         // Send a success response
         return res.status(201).redirect("/");

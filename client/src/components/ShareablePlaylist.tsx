@@ -24,6 +24,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
     const [saveStatus, setSaveStatus] = useState(0);
     const [platform, setPlatform] = useState<Platform>();
     const [isSpotifyConnected, setSpotifyConnected] = useState(false);
+    const [music, setMusicKitInstance] = useState<MusicKit.MusicKitInstance>();
 
     async function saveToSpotify() {
         setPlatform(Platform.Spotify);
@@ -73,9 +74,65 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         setSaveStatus(response.status);
     }
 
-    // function saveToApple() {
+    async function saveToApple() {
+        setPlatform(Platform.Apple);
+        setSaveStatus(-1);
 
-    // }
+        await authorizeMusicKit();
+
+        if (!music?.isAuthorized) {
+            setSaveStatus(401);
+            return;
+        }
+
+        async function convertToAppleSong(isrc: string, title: string, artist: string): Promise<{
+            id: string;
+            type: string;
+        } | null> {
+            const searchParams = new URLSearchParams({
+                isrc: isrc,
+                title: title,
+                artist: artist
+            });
+            try {
+                const res = await fetch(`/api/apple/search?${searchParams}`);
+                const tracks: { id: string, type: string }[] = await res.json();
+                if (tracks[0]) {
+                    return {
+                        id: tracks[0].id,
+                        type: tracks[0].type
+                    };
+                }
+                else {
+                    return null;
+                }
+            } catch (error) {
+                console.error(searchParams.toString(), error);
+                return null;
+            }
+        }
+
+        const convertPromises = playlist.tracks.map(track =>
+            convertToAppleSong(track.isrc, track.title.replace(/ /g, "+"), track.artists.join("+"))
+        );
+        const appleTracks = (await Promise.all(convertPromises)).filter((item): item is { id: string; type: string; } => item !== null);
+
+        const body = {
+            musicUserToken: music.musicUserToken,
+            playlistName: playlist.title,
+            tracks: appleTracks,
+            imageUrl: playlist.imageUrl
+        }
+        const response = await fetch("/api/apple/save-playlist", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        console.log(response)
+        setSaveStatus(response.status);
+    }
 
     // function saveToDeezer() {
 
@@ -168,7 +225,45 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     useEffect(() => {
         checkSpotifyLoginStatus();
-    }, [])
+        configureMusicKit();
+    }, []);
+
+    async function configureMusicKit() {
+        if (!window.MusicKit) {
+            const musicKitLoadedListener = () => {
+                configureMusicKit();
+            };
+            document.addEventListener('musickitloaded', musicKitLoadedListener);
+        }
+
+        fetch("/api/apple/dev-token")
+            .then(response => response.text())
+            .then(token => {
+                MusicKit.configure({
+                    developerToken: token,
+                    app: {
+                        name: 'Playvert',
+                        build: '0.0.2',
+                    },
+                });
+
+                // MusicKit instance is available
+                setMusicKitInstance(MusicKit.getInstance());
+            })
+            .catch(error => console.error('Error getting Apple developer token:', error));
+    }
+
+    async function authorizeMusicKit() {
+        if (!music) {
+            return;
+        }
+        if (!music.isAuthorized) {
+            await music.authorize()
+                .catch(error => {
+                    console.error("Error authorizing MusicKit:", error);
+                });
+        }
+    }
 
     let startedSave = false;
     useEffect(() => {
@@ -234,7 +329,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     return (
         <>
-            {playlist && playlist.tracks.length > 0 ? (
+            {playlist.tracks.length > 0 ? (
                 <>
                     <a href={playlist.playlistUrl} target="_blank">
                         <img src={playlist.imageUrl} style={{ width: "10rem" }} />
@@ -249,8 +344,8 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                         <p>Shareable link expires in 24 hours</p>
                         <section className="save-buttons">
                             <button onClick={saveToSpotify}><FontAwesomeIcon className="small-icon" icon={faSpotify} /> Save to Spotify</button>
-                            {/* <button><FontAwesomeIcon className="small-icon" icon={faItunesNote} /> Save to Apple Music</button>
-                            <button><FontAwesomeIcon className="small-icon" icon={faDeezer} /> Save to Deezer</button> */}
+                            <button onClick={saveToApple}><FontAwesomeIcon className="small-icon" icon={faItunesNote} /> Save to Apple Music</button>
+                            {/* <button><FontAwesomeIcon className="small-icon" icon={faDeezer} /> Save to Deezer</button> */}
                         </section>
                         <div className="save-progress">{renderSaveProgress()}</div>
                     </> : null}
@@ -265,8 +360,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                             : null}
                     </div>
                     {<section className="playlist-data">
-                        {playlist.tracks.map((track) => {
-                            const isrc = track.isrc;
+                        {playlist.tracks.map((track, index) => {
                             const title = track.title;
                             const artistLength = track.artists.length;
                             let artists = "";
@@ -284,7 +378,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                                 artists += track.artists[0];
                             }
                             return (
-                                <a href={track.linkToSong} target="_blank" key={isrc}>
+                                <a href={track.linkToSong} target="_blank" key={index}>
                                     <figure><img src={track.coverArtUrl} />
                                         <figcaption><h4>{title}</h4></figcaption>
                                         <figcaption className="small">{artists}</figcaption>
