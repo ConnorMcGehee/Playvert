@@ -231,6 +231,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
     async function configureMusicKit() {
         if (!window.MusicKit) {
             const musicKitLoadedListener = () => {
+                console.log("Loaded!")
                 configureMusicKit();
             };
             document.addEventListener('musickitloaded', musicKitLoadedListener);
@@ -255,9 +256,9 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     async function authorizeMusicKit() {
         if (!music) {
-            return;
+            await configureMusicKit();
         }
-        if (!music.isAuthorized) {
+        if (music && !music.isAuthorized) {
             await music.authorize()
                 .catch(error => {
                     console.error("Error authorizing MusicKit:", error);
@@ -322,7 +323,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         if (saveStatus >= 300) {
             return <>
                 <br />
-                <FontAwesomeIcon icon={faCircleExclamation} /> There was an error saving the playlist to {platformText}.
+                <FontAwesomeIcon icon={faCircleExclamation} /> There was an error saving the playlist to {platformText} (Error {saveStatus}).
             </>
         }
     }
