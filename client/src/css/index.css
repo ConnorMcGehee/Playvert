@@ -35,13 +35,13 @@ h2 {
   margin-top: 1rem;
   background-color: #064210;
   color: white;
-  width: 100%;
+  width: 100vw;
   text-align: center;
   padding: 0.5rem;
-  border-radius: 0.5rem;
 }
 
-h2 a, h2 a:visited {
+h2 a,
+h2 a:visited {
   color: inherit;
 }
 
@@ -63,7 +63,7 @@ button {
     color: var(--link-hover-color);
     text-shadow: 0 0 0.25rem #a6eac455;
   }
-  
+
   h2 a:hover {
     color: inherit;
     text-decoration: underline;
@@ -147,4 +147,12 @@ h4 {
 
 progress {
   display: block;
+}
+
+@media (min-width: 40em) {
+  h2 {
+    width: 100%;
+
+    border-radius: 0.5rem;
+  }
 }

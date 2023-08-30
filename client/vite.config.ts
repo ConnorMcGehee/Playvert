@@ -9,7 +9,16 @@ export default defineConfig(({ mode }) => {
   const isDev = process.env.ENVIRONMENT === "dev";
 
   return {
-    plugins: [react()],
+    plugins: [react(),
+    {
+      name: "configure-response-headers",
+      configureServer: (server) => {
+        server.middlewares.use((_req, res, next) => {
+          res.setHeader("Referrer-Policy", "origin");
+          next();
+        });
+      },
+    }],
     server: {
       proxy: isDev ? {
         '/auth': 'http://localhost:8888',

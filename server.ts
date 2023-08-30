@@ -9,6 +9,7 @@ import { createClient } from "redis"
 import { auth } from 'express-openid-connect';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import cors from "cors";
 
 console.log("Starting up...")
 
@@ -44,6 +45,8 @@ export const generateRandomString = function (length = 16) {
 };
 
 const app = express();
+
+app.use(cors());
 
 const PORT = process.env.PORT;
 
@@ -182,4 +185,3 @@ Promise.all(routeFiles.map(async (file) => {
     }
   });
 });
-

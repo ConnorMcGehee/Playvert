@@ -75,15 +75,20 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
     }
 
     async function saveToApple() {
+        console.log("Initializing Apple Music save")
         setPlatform(Platform.Apple);
         setSaveStatus(-1);
-
+        console.log("Authorizing Apple Music")
         await authorizeMusicKit();
+
 
         if (!music?.isAuthorized) {
             setSaveStatus(401);
+            console.log("Unauthorized ): sorry")
             return;
         }
+
+        console.log("Authorized Apple Music")
 
         async function convertToAppleSong(isrc: string, title: string, artist: string): Promise<{
             id: string;
@@ -95,6 +100,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                 artist: artist
             });
             try {
+                console.count("Converting song");
                 const res = await fetch(`/api/apple/search?${searchParams}`);
                 const tracks: { id: string, type: string }[] = await res.json();
                 if (tracks[0]) {
@@ -116,13 +122,14 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
             convertToAppleSong(track.isrc, track.title.replace(/ /g, "+"), track.artists.join("+"))
         );
         const appleTracks = (await Promise.all(convertPromises)).filter((item): item is { id: string; type: string; } => item !== null);
-
+        console.log("Converted songs")
         const body = {
             musicUserToken: music.musicUserToken,
             playlistName: playlist.title,
             tracks: appleTracks,
             imageUrl: playlist.imageUrl
         }
+        console.log("Saving playlist")
         const response = await fetch("/api/apple/save-playlist", {
             method: "POST",
             headers: {
@@ -132,6 +139,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         });
         console.log(response)
         setSaveStatus(response.status);
+        console.log("Finished")
     }
 
     // function saveToDeezer() {
@@ -235,6 +243,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                 configureMusicKit();
             };
             document.addEventListener('musickitloaded', musicKitLoadedListener);
+            return;
         }
 
         fetch("/api/apple/dev-token")
@@ -256,10 +265,15 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     async function authorizeMusicKit() {
         if (!music) {
+            console.log("Configuring MusicKit")
             await configureMusicKit();
         }
+
         if (music && !music.isAuthorized) {
             await music.authorize()
+                .then(() => {
+                    console.log("Authorized!")
+                })
                 .catch(error => {
                     console.error("Error authorizing MusicKit:", error);
                 });

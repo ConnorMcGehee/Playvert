@@ -6,6 +6,7 @@
     "devstart": "nodemon server.ts"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",
     "@types/node": "^20.3.1"
@@ -14,6 +15,7 @@
     "@aws-sdk/client-dynamodb": "^3.347.0",
     "@aws-sdk/lib-dynamodb": "^3.353.0",
     "connect-redis": "^7.1.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "express-openid-connect": "^2.16.0",
