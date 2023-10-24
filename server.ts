@@ -10,7 +10,7 @@ import { auth } from 'express-openid-connect';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import cors from "cors";
-import puppeteer, { Browser } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { CancelableRequest, Response as GotResponse } from 'got';
 
 console.log("Starting up...")
@@ -75,7 +75,7 @@ const createRedisClient = () => createClient({
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
     port: 13380
-}
+  },
 });
 
 const maxRetries = 5;
