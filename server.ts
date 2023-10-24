@@ -17,6 +17,11 @@ console.log("Starting up...")
 
 dotenv.config();
 
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log("Current directory:", __dirname);
+
 export const isProductionEnv = process.env.ENVIRONMENT === "prod";
 export const baseUrl = isProductionEnv ? "https://playvert.com" : "http://localhost:8888";
 
@@ -177,11 +182,6 @@ declare module 'express-session' {
 }
 
 app.set('trust proxy', 1)
-
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-console.log("Current directory:", __dirname);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, './client/dist')));
