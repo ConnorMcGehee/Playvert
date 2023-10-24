@@ -90,6 +90,7 @@ export const getBrowserInstance = async () => {
 
   browser = await puppeteer.launch({
     headless: "new",
+    executablePath: isProductionEnv ? "/home/apps/.cache/puppeteer/chrome/linux-118.0.5993.70" : undefined
   });
 
   console.log("Puppeteer browser launched.");
