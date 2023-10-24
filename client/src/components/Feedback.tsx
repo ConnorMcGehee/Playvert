@@ -73,12 +73,12 @@ function Feedback() {
         setIsLoading(false);
     }
 
-    return (
-        <>
-            <h1>Feedback Submission Coming Soon!</h1>
-            <Link to="/">Return Home</Link>
-        </>
-    )
+    // return (
+    //     <>
+    //         <h1>Feedback Submission Coming Soon!</h1>
+    //         <Link to="/">Return Home</Link>
+    //     </>
+    // )
 
     return (
         <>
