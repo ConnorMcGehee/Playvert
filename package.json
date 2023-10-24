@@ -26,6 +26,7 @@
     "nodemailer": "^6.9.7",
     "nodemon": "^3.0.1",
     "puppeteer": "^21.4.0",
+    "puppeteer-core": "^21.4.1",
     "redis": "^4.6.7",
     "short-uuid": "^4.2.2",
     "ts-node": "^10.9.1",
