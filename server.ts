@@ -181,6 +181,8 @@ app.set('trust proxy', 1)
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+console.log("Current directory:", __dirname);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, './client/dist')));
 
