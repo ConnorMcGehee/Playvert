@@ -5,4 +5,6 @@ export const router = express.Router();
 export const path = "/api/playlists";
 
 router.post("/generate-url", controller.generateUrl);
+router.get("/redirect-url", controller.getPlaylistRedirectUrl);
+
 router.get("/:id", controller.getPlaylist);

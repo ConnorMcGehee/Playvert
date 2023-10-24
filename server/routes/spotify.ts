@@ -14,4 +14,4 @@ router.get("/playlists/:id", spotifyRefreshToken, controller.getPlaylist);
 router.get("/playlists/:id/tracks", spotifyRefreshToken, controller.getPlaylistSongs);
 router.get("/logout", controller.logout);
 router.get("/search", spotifyRefreshToken, controller.search);
-router.post("/save-playlist", spotifyRefreshToken, controller.savePlaylist)
+router.post("/save-playlist", spotifyRefreshToken, controller.savePlaylist);

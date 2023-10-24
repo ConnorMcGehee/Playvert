@@ -10,13 +10,15 @@ import { auth } from 'express-openid-connect';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import cors from "cors";
+import puppeteer, { Browser } from 'puppeteer';
+import { CancelableRequest, Response as GotResponse } from 'got';
 
 console.log("Starting up...")
 
 dotenv.config();
 
-const isProductionEnv = process.env.ENVIRONMENT === "prod";
-export const baseUrl = isProductionEnv ? "https://playvert.com" : "http://localhost:5173";
+export const isProductionEnv = process.env.ENVIRONMENT === "prod";
+export const baseUrl = isProductionEnv ? "https://playvert.com" : "http://localhost:8888";
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION,
@@ -33,6 +35,8 @@ export enum Platform {
   Apple,
   Deezer
 }
+
+export type NewRequest = CancelableRequest<Buffer | GotResponse<any>>;
 
 export const generateRandomString = function (length = 16) {
   let text = "";
@@ -71,7 +75,7 @@ const createRedisClient = () => createClient({
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
     port: 13380
-  }
+}
 });
 
 const maxRetries = 5;
@@ -82,7 +86,6 @@ let redisClient = createRedisClient();
 const connectWithRetry = () => {
   return new Promise<void>((resolve, reject) => {
     const attemptConnection = () => {
-      console.log(`Attempting to connect to Redis (attempt ${retryCount + 1} of ${maxRetries})...`);
 
       redisClient = createRedisClient();
 
@@ -112,7 +115,7 @@ const connectWithRetry = () => {
           resolve();
         })
         .catch((error) => {
-          console.error('Redis connection error:', error);
+          console.error(`Redis connection error: "${error}". Trying again...`);
 
           retryCount++;
 
@@ -132,7 +135,6 @@ const connectWithRetry = () => {
 
 await connectWithRetry();
 
-
 declare module 'express-session' {
   export interface Session {
     spotify_access_token?: string;
@@ -148,10 +150,40 @@ app.set('trust proxy', 1)
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, './client/dist')));
 
 app.use(express.urlencoded({ extended: false }));
+
+let browser: puppeteer.Browser | null = null;
+const TIMEOUT_MS = 3600000;  // 1 hour in milliseconds
+
+export const getBrowserInstance = async () => {
+  if (browser && browser.connected) {
+    return browser;
+  }
+
+  if (browser) {
+    await browser.close();
+  }
+
+  browser = await puppeteer.launch({
+    headless: "new"
+  });
+
+  console.log("Puppeteer browser launched.");
+
+  setTimeout(async () => {
+    if (browser) {
+      await browser.close();
+      browser = null;
+    }
+  }, TIMEOUT_MS);
+
+  return browser;
+};
+
+await getBrowserInstance();
 
 const routeFiles = fs.readdirSync(path.join(__dirname, '/server/routes'));
 // Note the use of Promise.all to wait for all dynamic imports

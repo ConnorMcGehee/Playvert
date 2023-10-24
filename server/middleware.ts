@@ -15,7 +15,7 @@ interface SpotifyTokenResponse {
 export async function spotifyRefreshToken(req: Request, res: Response, next: NextFunction) {
     const now = new Date().getTime();
 
-    if (!req.session.spotify_refresh_token) {
+    if (!req.session?.spotify_refresh_token) {
         next();
         return;
     }
