@@ -30,8 +30,8 @@ export const assessment = async (req: Request, res: Response) => {
     if (score && score > 0.5) {
         try {
             await transporter.sendMail({
-                from: 'Playvert <myserveremail@example.com>', // sender address
-                to: 'mypersonalemail@example.com', // list of receivers
+                from: 'Playvert <connor@playvert.com>', // sender address
+                to: 'connorjames050@gmail.com', // list of receivers
                 subject: 'New Playvert Feedback', // Subject line
                 html: `
                 <p><strong>Name:</strong> ${formData.name}</p>
