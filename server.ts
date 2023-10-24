@@ -70,6 +70,37 @@ const config = {
 
 app.use(auth(config));
 
+
+let browser: puppeteer.Browser | null = null;
+const TIMEOUT_MS = 3600000;  // 1 hour in milliseconds
+
+export const getBrowserInstance = async () => {
+  if (browser && browser.connected) {
+    return browser;
+  }
+
+  if (browser) {
+    await browser.close();
+  }
+
+  browser = await puppeteer.launch({
+    headless: "new",
+  });
+
+  console.log("Puppeteer browser launched.");
+
+  setTimeout(async () => {
+    if (browser) {
+      await browser.close();
+      browser = null;
+    }
+  }, TIMEOUT_MS);
+
+  return browser;
+};
+
+await getBrowserInstance();
+
 const createRedisClient = () => createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
@@ -154,36 +185,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, './client/dist')));
 
 app.use(express.urlencoded({ extended: false }));
-
-let browser: puppeteer.Browser | null = null;
-const TIMEOUT_MS = 3600000;  // 1 hour in milliseconds
-
-export const getBrowserInstance = async () => {
-  if (browser && browser.connected) {
-    return browser;
-  }
-
-  if (browser) {
-    await browser.close();
-  }
-
-  browser = await puppeteer.launch({
-    headless: "new",
-  });
-
-  console.log("Puppeteer browser launched.");
-
-  setTimeout(async () => {
-    if (browser) {
-      await browser.close();
-      browser = null;
-    }
-  }, TIMEOUT_MS);
-
-  return browser;
-};
-
-await getBrowserInstance();
 
 const routeFiles = fs.readdirSync(path.join(__dirname, '/server/routes'));
 // Note the use of Promise.all to wait for all dynamic imports
