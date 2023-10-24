@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "build": "npm --prefix ./client install && npm --prefix ./client run prodbuild",
+    "build": "node_modules/puppeteer/install.mjs && npm --prefix ./client install && npm --prefix ./client run prodbuild",
     "start": "ts-node server.ts",
     "dev": "nodemon server.ts"
   },
