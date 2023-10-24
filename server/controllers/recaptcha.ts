@@ -3,7 +3,16 @@ import { RecaptchaEnterpriseServiceClient } from '@google-cloud/recaptcha-enterp
 import nodemailer from 'nodemailer';
 import { isProductionEnv } from '../../server.ts';
 
-const client = new RecaptchaEnterpriseServiceClient();
+const base64EncodedKey = process.env.GOOGLE_PRIVATE_KEY_BASE64 || "";
+const privateKey = Buffer.from(base64EncodedKey, 'base64').toString('utf-8');
+
+const client = new RecaptchaEnterpriseServiceClient({
+    credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: privateKey
+    }
+});
+
 const transporter = nodemailer.createTransport({
     host: "smtp.forwardemail.net",
     port: isProductionEnv ? 465 : 587,
@@ -17,6 +26,7 @@ const transporter = nodemailer.createTransport({
 export const assessment = async (req: Request, res: Response) => {
     const { formData } = req.body;
     const score = await createAssessment(req.body);
+    console.log(score)
     if (score && score > 0.5) {
         try {
             await transporter.sendMail({
