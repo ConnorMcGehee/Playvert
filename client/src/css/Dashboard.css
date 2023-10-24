@@ -20,47 +20,14 @@
 }
 
 #search {
-    font-family: "Red Hat Display", sans-serif;
     align-self: center;
-    -webkit-appearance: none;
-    appearance: none;
     flex: 0.9;
-    padding: 1rem;
-    border: 0.1rem solid #91c6a9;
-    font-size: 1.3rem;
     text-align: center;
-    border-radius: var(--border-radius);
-    background-color: rgb(255, 255, 255);
-    color: #0f5833;
-}
-
-::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: #86a694;
-    opacity: 1;
-    /* Firefox */
-}
-
-:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
-    color: #86a694;
-}
-
-::-ms-input-placeholder {
-    /* Microsoft Edge */
-    color: #86a694;
-}
-
-#search:focus {
-    outline: none;
-    box-shadow: 0 0 0.75rem #60a37d;
 }
 
 #search-container {
-    width: clamp(17rem, 80%, 63rem);
+    width: clamp(17rem, 90%, 55rem);
     margin: auto;
-    padding: 1rem;
-    margin-top: 10rem;
     border-radius: var(--border-radius);
     background: rgb(223, 223, 223);
     background: radial-gradient(closest-side, rgba(223, 223, 223, 1) 0%, var(--background-color) 100%);

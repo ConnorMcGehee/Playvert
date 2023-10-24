@@ -1,176 +1,167 @@
 import { useParams } from "react-router-dom";
-import { Platform, Playlist } from "./App";
+import { Track, AppleTrack, Platform, Playlist, PlayvertAPIResponse, SpotifyTrack } from "./App";
 import { useEffect, useState } from "react";
 import "../css/ShareablePlaylist.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDeezer, faItunesNote, faSpotify } from "@fortawesome/free-brands-svg-icons";
-import { faFaceFrownOpen } from "@fortawesome/free-regular-svg-icons";
+import { faFaceFrownOpen, faClipboard } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+import ky from "ky";
 
-interface ShareablePlaylistProps {
-    newPlaylist?: Playlist,
-    newId?: string,
-    isConverting?: boolean
+interface ConvertFunction {
+    (track: Track): Promise<any>;
 }
 
-function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: ShareablePlaylistProps) {
+function ShareablePlaylist() {
     const params = useParams();
-    const id = params.id || newId;
-    const savePlatform = params.platform || "";
+    const id = params.id;
 
     const [shareLink, setShareLink] = useState("");
     const [playlist, setPlaylist] = useState<Playlist>(new Playlist());
     const [notFound, setNotFound] = useState(false);
     const [saveStatus, setSaveStatus] = useState(0);
     const [platform, setPlatform] = useState<Platform>();
-    const [isSpotifyConnected, setSpotifyConnected] = useState(false);
     const [music, setMusicKitInstance] = useState<MusicKit.MusicKitInstance>();
+    const [displayCopied, setDisplayCopied] = useState(false);
+    const [copiedTimeout, setCopiedTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+    const [progress, setProgress] = useState(-1);
 
-    async function saveToSpotify() {
-        setPlatform(Platform.Spotify);
-        setSaveStatus(-1);
-
-        let loggedIn = await checkSpotifyLoginStatus();
-
-        if (!loggedIn) {
-            window.location.replace(`/api/spotify/login/${id}`);
-            return;
+    async function processTracks(tracks: Track[], convertFunction: ConvertFunction, chunkSize: number = 20): Promise<any[]> {
+        const results: any[] = [];
+        for (let i = 0; i < tracks.length; i += chunkSize) {
+            const chunk = tracks.slice(i, i + chunkSize);
+            const chunkPromises = chunk.map(track => convertFunction(track));
+            const chunkResults = await Promise.all(chunkPromises);
+            results.push(...chunkResults);
         }
+        return results;
+    }
 
-        async function convertToSpotifySong(isrc: string, title: string, artist: string) {
+    async function convertToSpotifySong({ isrc, title, artists }: Track): Promise<string> {
+        try {
             const searchParams = new URLSearchParams({
                 isrc: isrc,
                 title: title,
-                artist: artist
+                artist: artists.join(" ")
             });
-            const uri = await fetch(`/api/spotify/search?${searchParams}`)
-                .then(res => {
-                    return res.json()
-                })
-                .then(tracks => {
-                    return tracks[0].uri;
-                })
+            const tracks: SpotifyTrack[] = await ky(`/api/spotify/search?${searchParams}`).json();
+            const uri = tracks[0].uri;
+            if (!uri) {
+                throw new Error("No URI found.");
+            }
             return uri;
         }
-        const convertPromises: Promise<string>[] = [];
-        for (let track of playlist.tracks) {
-            convertPromises.push(convertToSpotifySong(
-                track.isrc, track.title, track.artists.join(" ")
-            ));
+        catch (error) {
+            throw new Error("No URI found.");
         }
-        const spotifyTrackUris = await Promise.all(convertPromises);
-        const body = {
-            playlistName: playlist.title,
-            uris: spotifyTrackUris,
-            imageUrl: playlist.imageUrl
+        finally {
+            setProgress(prevProgress => prevProgress + 1);
         }
-        const response = await fetch("/api/spotify/save-playlist", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-        setSaveStatus(response.status);
+    }
+
+    async function convertToAppleSong({ isrc, title, artists }: Track): Promise<{ id: string; type: string }> {
+        try {
+            const searchParams = new URLSearchParams({
+                isrc: isrc,
+                title: title,
+                artist: artists.join(" ")
+            });
+            const track: AppleTrack = await ky(`/api/apple/search?${searchParams}`).json();
+            if (track) {
+                return {
+                    id: track.id,
+                    type: track.type
+                };
+            }
+            else {
+                throw new Error("No ID found.");
+            }
+        } catch (error) {
+            throw new Error("No ID found.");
+        } finally {
+            setProgress(prevProgress => prevProgress + 1);
+        }
+    }
+
+    async function saveToSpotify() {
+        try {
+            setPlatform(Platform.Spotify);
+            setSaveStatus(0);
+
+            let loggedIn = await checkSpotifyLoginStatus();
+
+            if (!loggedIn) {
+                sessionStorage.setItem('shouldSave', Platform.Spotify.toString());
+                window.location.replace(`/api/spotify/login/${id}`);
+                return;
+            }
+
+            setSaveStatus(-1);
+            setProgress(0);
+
+            const spotifyTrackUris = await processTracks(playlist.tracks, convertToSpotifySong);
+
+            const body = {
+                playlistName: playlist.title,
+                uris: spotifyTrackUris,
+                imageUrl: playlist.imageUrl
+            }
+
+            const response = await ky.post("/api/spotify/save-playlist", { json: body });
+            setSaveStatus(response.status);
+        }
+        catch (error) {
+            console.log(error);
+            setSaveStatus(500);
+        }
+        finally {
+            setProgress(-1);
+        }
     }
 
     async function saveToApple() {
-        console.log("Initializing Apple Music save")
-        setPlatform(Platform.Apple);
-        setSaveStatus(-1);
-        console.log("Authorizing Apple Music")
-        await authorizeMusicKit();
+        try {
+            setPlatform(Platform.Apple);
+            setSaveStatus(0);
 
-
-        if (!music?.isAuthorized) {
-            setSaveStatus(401);
-            console.log("Unauthorized ): sorry")
-            return;
-        }
-
-        console.log("Authorized Apple Music")
-
-        async function convertToAppleSong(isrc: string, title: string, artist: string): Promise<{
-            id: string;
-            type: string;
-        } | null> {
-            const searchParams = new URLSearchParams({
-                isrc: isrc,
-                title: title,
-                artist: artist
-            });
-            try {
-                console.count("Converting song");
-                const res = await fetch(`/api/apple/search?${searchParams}`);
-                const tracks: { id: string, type: string }[] = await res.json();
-                if (tracks[0]) {
-                    return {
-                        id: tracks[0].id,
-                        type: tracks[0].type
-                    };
-                }
-                else {
-                    return null;
-                }
-            } catch (error) {
-                console.error(searchParams.toString(), error);
-                return null;
+            await authorizeMusicKit();
+            if (!music?.isAuthorized) {
+                setSaveStatus(401);
+                throw new Error("Not authorized");
             }
-        }
 
-        const convertPromises = playlist.tracks.map(track =>
-            convertToAppleSong(track.isrc, track.title.replace(/ /g, "+"), track.artists.join("+"))
-        );
-        const appleTracks = (await Promise.all(convertPromises)).filter((item): item is { id: string; type: string; } => item !== null);
-        console.log("Converted songs")
-        const body = {
-            musicUserToken: music.musicUserToken,
-            playlistName: playlist.title,
-            tracks: appleTracks,
-            imageUrl: playlist.imageUrl
+            setSaveStatus(-1);
+            setProgress(0);
+
+            const appleTracks = await processTracks(playlist.tracks, convertToAppleSong);
+
+            const body = {
+                musicUserToken: music.musicUserToken,
+                playlistName: playlist.title,
+                tracks: appleTracks,
+                imageUrl: playlist.imageUrl
+            }
+            const response = await ky.post("/api/apple/save-playlist", { json: body });
+            setSaveStatus(response.status);
         }
-        console.log("Saving playlist")
-        const response = await fetch("/api/apple/save-playlist", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-        console.log(response)
-        setSaveStatus(response.status);
-        console.log("Finished")
+        catch {
+            setSaveStatus(500);
+        }
     }
 
     // function saveToDeezer() {
 
     // }
 
-    async function fetchPlaylist() {
+    async function getPlaylist() {
         setPlaylist(new Playlist());
-        await fetch(`/api/playlists/${id}`)
-            .then(res => res.json())
-            .then((data) => {
-                setPlaylist(data.playlist);
-            })
-            .catch(() => {
-                setNotFound(true);
-            });
-    }
-
-    function disconnectLink() {
-        return "/api/spotify/logout";
-
-        // add other disconnect links here
-    }
-    function disconnectText() {
-
-        return `Disconnect from Spotify`;
-
-        // if (typeof playlist.platform !== "undefined") {
-        //     return `Disconnect from ${Platform[playlist.platform]}`;
-        // }
-        // return null;
+        try {
+            const data: PlayvertAPIResponse = await ky(`/api/playlists/${id}`).json();
+            setPlaylist(data.playlist);
+        }
+        catch {
+            setNotFound(true);
+        }
     }
 
     function platformText() {
@@ -209,45 +200,31 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     let didInit = false;
     useEffect(() => {
-        if (!newPlaylist && !didInit) {
+        if (!didInit) {
             didInit = true;
-            fetchPlaylist();
+            getPlaylist();
         }
-        else if (newPlaylist) {
-            setPlaylist(new Playlist());
-            setPlaylist(newPlaylist);
-        }
-    }, [newPlaylist]);
+    }, []);
 
     async function checkSpotifyLoginStatus() {
-        const isLoggedIn = await new Promise<boolean>((resolve) => {
-            fetch("/api/spotify/login-status")
-                .then(res => res.json())
-                .then((isLoggedIn: boolean) => {
-                    setSpotifyConnected(isLoggedIn);
-                    resolve(isLoggedIn);
-                })
-        });
+        const isLoggedIn: boolean = await ky("/api/spotify/login-status").json();
         return isLoggedIn;
     }
 
     useEffect(() => {
-        checkSpotifyLoginStatus();
         configureMusicKit();
     }, []);
 
     async function configureMusicKit() {
         if (!window.MusicKit) {
             const musicKitLoadedListener = () => {
-                console.log("Loaded!")
                 configureMusicKit();
             };
             document.addEventListener('musickitloaded', musicKitLoadedListener);
             return;
         }
 
-        fetch("/api/apple/dev-token")
-            .then(response => response.text())
+        ky("/api/apple/dev-token").text()
             .then(token => {
                 MusicKit.configure({
                     developerToken: token,
@@ -265,15 +242,11 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     async function authorizeMusicKit() {
         if (!music) {
-            console.log("Configuring MusicKit")
             await configureMusicKit();
         }
 
         if (music && !music.isAuthorized) {
             await music.authorize()
-                .then(() => {
-                    console.log("Authorized!")
-                })
                 .catch(error => {
                     console.error("Error authorizing MusicKit:", error);
                 });
@@ -282,8 +255,10 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
 
     let startedSave = false;
     useEffect(() => {
+        const savePlatform = sessionStorage.getItem('shouldSave');
         if (savePlatform && !startedSave && playlist.tracks.length > 0) {
             startedSave = true;
+            sessionStorage.removeItem('shouldSave');
             switch (parseInt(savePlatform)) {
                 case Platform.Spotify: {
                     saveToSpotify();
@@ -300,7 +275,7 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                 }
             }
         }
-    }, [playlist])
+    }, [playlist]);
 
     function renderSaveProgress() {
         if (!saveStatus) {
@@ -309,8 +284,14 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         if (saveStatus < 0) {
             return <>
                 <br />
-                <progress />
-                Saving playlist...
+                <div className="saving-progress">
+                    <progress value={progress} max={playlist.tracks.length + 1} />
+                    {progress === playlist.tracks.length ?
+                        "Saving playlist..."
+                        :
+                        `Converting song ${progress} of ${playlist.tracks.length}...`
+                    }
+                </div>
             </>
         }
         let platformText = "";
@@ -331,16 +312,32 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
         if (saveStatus >= 200 && saveStatus < 300) {
             return <>
                 <br />
-                <FontAwesomeIcon icon={faCircleCheck} /> Playlist saved to {platformText}!
+                <FontAwesomeIcon className="small-icon" icon={faCircleCheck} /> Playlist saved to {platformText}!
             </>
         }
         if (saveStatus >= 300) {
             return <>
                 <br />
-                <FontAwesomeIcon icon={faCircleExclamation} /> There was an error saving the playlist to {platformText} (Error {saveStatus}).
+                <FontAwesomeIcon className="small-icon" icon={faCircleExclamation} /> There was an error saving the playlist to {platformText} (Error {saveStatus}).
             </>
         }
     }
+
+    function copyShareLink() {
+        if (copiedTimeout) {
+            clearTimeout(copiedTimeout);
+        }
+
+        navigator.clipboard.writeText(shareLink);
+
+        setDisplayCopied(true);
+
+        const newTimeout = setTimeout(() => {
+            setDisplayCopied(false);
+        }, 2000);
+
+        setCopiedTimeout(newTimeout);
+    };
 
     return (
         <>
@@ -355,7 +352,10 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                         </a>
                     </h2>
                     {id ? <>
-                        <input type="text" value={shareLink} readOnly className="share-link" />
+                        <div className="input-icon-container">
+                            <input type="text" value={displayCopied ? "Copied to clipboard!" : shareLink} readOnly onClick={copyShareLink} className="share-link" />
+                            <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} />
+                        </div>
                         <p>Shareable link expires in 24 hours</p>
                         <section className="save-buttons">
                             <button onClick={saveToSpotify}><FontAwesomeIcon className="small-icon" icon={faSpotify} /> Save to Spotify</button>
@@ -368,11 +368,6 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                         <a href={playlist.playlistUrl} target="_blank">
                             {platformText()}
                         </a>
-                        {isSpotifyConnected ?
-                            <a href={disconnectLink()}>
-                                {disconnectText()}
-                            </a>
-                            : null}
                     </div>
                     {<section className="playlist-data">
                         {playlist.tracks.map((track, index) => {
@@ -404,14 +399,12 @@ function ShareablePlaylist({ newPlaylist, newId, isConverting = false }: Shareab
                     </section>}
                 </>
             )
-                : notFound ? <p><FontAwesomeIcon icon={faFaceFrownOpen} style={{ fontSize: "1.5rem" }} /><br /><br />
+                : notFound ? <p><FontAwesomeIcon className="small-icon" icon={faFaceFrownOpen} style={{ fontSize: "1.5rem" }} /><br /><br />
                     The playlist you're looking for doesn't exist or has expired.</p>
-                    : isConverting ?
-                        null
-                        : <>
-                            <p>Loading...</p>
-                            <progress />
-                        </>
+                    :
+                    <>
+                        <progress />
+                    </>
             }
         </>
     )

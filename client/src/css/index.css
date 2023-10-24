@@ -1,15 +1,24 @@
 :root {
   --background-color: rgb(241, 245, 242);
   --font-color: #063816;
-  --link-color: #1a6e53;
-  --link-hover-color: #38ac84;
+  --link-color: rgb(0, 129, 49);
+  --link-hover-color: rgb(0, 188, 72);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
+  text-align: center;
   margin: 0;
   background-color: var(--background-color);
   font-family: 'Red Hat Display', sans-serif;
   color: var(--font-color);
+}
+
+#root {
+  height: calc(100dvh - 1.5rem);
 }
 
 main {
@@ -19,6 +28,11 @@ main {
   width: clamp(17rem, 100%, 70rem);
   max-width: 90rem;
   margin: auto;
+  min-height: calc(100% - 9rem)
+}
+
+p {
+  max-width: 50rem;
 }
 
 a {
@@ -35,7 +49,7 @@ h2 {
   margin-top: 1rem;
   background-color: #064210;
   color: white;
-  width: 100vw;
+  width: 100%;
   text-align: center;
   padding: 0.5rem;
 }
@@ -61,7 +75,7 @@ button {
 @media (hover:hover) {
   a:hover {
     color: var(--link-hover-color);
-    text-shadow: 0 0 0.25rem #a6eac455;
+    text-shadow: 0 0 0.25rem rgba(166, 234, 196, 0.333);
   }
 
   h2 a:hover {
@@ -149,10 +163,45 @@ progress {
   display: block;
 }
 
-@media (min-width: 40em) {
-  h2 {
-    width: 100%;
+input,
+textarea {
+  font-family: "Red Hat Display", sans-serif;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 1rem;
+  border: 0.1rem solid #91c6a9;
+  border-radius: var(--border-radius);
+  background-color: rgb(255, 255, 255);
+  color: #0f5833;
+  width: clamp(17rem, 90vw, 28rem);
+}
 
-    border-radius: 0.5rem;
-  }
+input {
+  font-size: 1.3rem;
+}
+
+textarea {
+  font-size: 1rem;
+}
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #86a694;
+  opacity: 1;
+  /* Firefox */
+}
+
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #86a694;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0.75rem #60a37d;
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
 }

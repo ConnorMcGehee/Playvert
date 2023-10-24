@@ -1,9 +1,30 @@
+.input-icon-container {
+    position: relative;
+}
+
+@media (hover:hover) {
+    .input-icon-container:hover {
+        color: var(--link-hover-color);
+        text-shadow: 0 0 0.25rem rgba(166, 234, 196, 0.333);
+    }
+}
+
+.copy-icon {
+    position: absolute;
+    top: 50%;
+    right: 1.5rem;
+    cursor: pointer;
+    transform: translateY(-25%);
+    transition: opacity 0.2s ease-in-out;
+}
+
 .share-link {
     font-family: "Red Hat Display", sans-serif;
     align-self: center;
     -webkit-appearance: none;
     appearance: none;
     padding: 1rem;
+    padding-right: 2.5rem;
     border: 0.1rem solid #91c6a9;
     font-size: 1.3rem;
     text-align: center;
@@ -13,6 +34,7 @@
     width: clamp(8rem, 80vw, 40rem);
     margin: 1rem;
     margin-bottom: 0;
+    cursor: pointer;
 }
 
 .save-buttons {
@@ -37,6 +59,12 @@ p {
 .save-progress {
     text-align: center;
     margin: 0 1rem;
+}
+
+.saving-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .platform-link {
