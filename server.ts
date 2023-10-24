@@ -108,20 +108,20 @@ const connectWithRetry = () => {
                 httpOnly: true,
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 sameSite: "none",
-                secure: isProductionEnv ? true : false
+                secure: isProductionEnv
               }
             })
           );
           resolve();
         })
         .catch((error) => {
-          console.error(`Redis connection error: "${error}". Trying again...`);
 
           retryCount++;
 
+          console.error(`Redis connection error: "${error}". Trying again in ${retryCount * 10} seconds...`);
           if (retryCount < maxRetries) {
             // Wait 1 second before attempting to reconnect
-            setTimeout(attemptConnection, 1000);
+            setTimeout(attemptConnection, 10000 * retryCount);
           } else {
             console.error(`Failed to connect to Redis after ${maxRetries} attempts.`);
             reject(new Error('Failed to connect to Redis'));
