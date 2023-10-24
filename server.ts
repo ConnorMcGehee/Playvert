@@ -168,7 +168,7 @@ export const getBrowserInstance = async () => {
   }
 
   browser = await puppeteer.launch({
-    headless: "new"
+    headless: "new",
   });
 
   console.log("Puppeteer browser launched.");
