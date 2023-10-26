@@ -37,61 +37,52 @@ p {
 
 a {
   color: var(--link-color);
-  text-decoration: none;
 }
 
 a:visited {
   color: var(--link-color);
 }
 
-h2 {
-  margin: 0;
-  margin-top: 1rem;
+h1 {
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
   background-color: #064210;
   color: white;
-  width: 100%;
-  text-align: center;
+  width: 100vw;
   padding: 0.5rem;
-}
-
-h2 a,
-h2 a:visited {
-  color: inherit;
+  text-align: center;
 }
 
 button {
   cursor: pointer;
   border-radius: var(--border-radius);
-  border: 0.1rem solid #91c6a9;
+  border: 0.1rem solid #46966a;
   padding: 1rem;
   font-size: 1.3rem;
   width: fit-content;
-  background: rgb(223, 223, 223);
-  background: linear-gradient(326deg, rgb(97, 182, 123) 0%, rgb(195, 241, 208) 100%);
+  background: rgb(10, 100, 50);
   color: rgb(255, 255, 255);
-  text-shadow: 0 0.1rem 0.25rem #064210;
 }
 
 @media (hover:hover) {
-  a:hover {
+  a:hover, .platform-link:hover {
     color: var(--link-hover-color);
     text-shadow: 0 0 0.25rem rgba(166, 234, 196, 0.333);
   }
 
-  h2 a:hover {
+  a:has(.platform-link) {
     color: inherit;
-    text-decoration: underline;
+    text-shadow: inherit;
   }
 
   button:hover {
-    background: rgb(255, 255, 255);
-    background: linear-gradient(326deg, rgb(87, 172, 113) 0%, rgb(185, 231, 197) 100%);
+    background: rgb(36, 131, 73);
   }
 }
 
 button:active {
-  background: rgb(255, 255, 255);
-  background: linear-gradient(326deg, rgb(141, 222, 179) 0%, rgb(140, 199, 162) 100%);
+  background: rgb(36, 131, 73);
 }
 
 section {
@@ -120,7 +111,8 @@ figure img {
   max-height: 2rem;
 }
 
-h4 {
+.playlist-title {
+  font-weight: bold;
   font-size: 0.96rem;
   margin: 0.5rem;
   margin-bottom: 0.25rem;

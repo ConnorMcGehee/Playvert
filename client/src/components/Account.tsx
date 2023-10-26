@@ -79,7 +79,7 @@ function Account() {
 
     return (
         <>
-            <h2>Account</h2>
+            <h1>Account</h1>
             <section id="account-settings">
                 {isLoading ? <>
                     <progress />

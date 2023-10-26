@@ -14,9 +14,9 @@ function Nav() {
     return (
         <div id="nav-container">
             <nav id="nav">
-                <Link id="logo" to="/"><img src={logo} alt="Logo" /><span>Playvert<sup>beta</sup></span></Link>
+                <Link id="logo" to="/"><img src={logo} alt="Playvert Home" /><span>Playvert<sup>beta</sup></span></Link>
                 <ul id="nav-list">
-                    <li><Link id="account-icon" to="/account"><FontAwesomeIcon className="small-icon" icon={faUser} /></Link></li>
+                    <li><Link id="account-icon" to="/account"><FontAwesomeIcon className="small-icon" icon={faUser} />Account</Link></li>
                 </ul>
             </nav>
         </div>

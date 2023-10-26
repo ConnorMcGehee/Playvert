@@ -1,21 +1,8 @@
-.input-icon-container {
-    position: relative;
-}
-
 @media (hover:hover) {
-    .input-icon-container:hover {
+    .share-link:hover .copy-icon {
         color: var(--link-hover-color);
         text-shadow: 0 0 0.25rem rgba(166, 234, 196, 0.333);
     }
-}
-
-.copy-icon {
-    position: absolute;
-    top: 50%;
-    right: 1.5rem;
-    cursor: pointer;
-    transform: translateY(-25%);
-    transition: opacity 0.2s ease-in-out;
 }
 
 .share-link {
@@ -24,17 +11,20 @@
     -webkit-appearance: none;
     appearance: none;
     padding: 1rem;
-    padding-right: 2.5rem;
     border: 0.1rem solid #91c6a9;
     font-size: 1.3rem;
     text-align: center;
     border-radius: var(--border-radius);
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(242, 255, 249);
     color: #0f5833;
     width: clamp(8rem, 80vw, 40rem);
     margin: 1rem;
     margin-bottom: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .save-buttons {
@@ -65,14 +55,4 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.platform-link {
-    justify-content: center;
-    margin: 1rem;
-    margin-bottom: 0;
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-    flex-wrap: wrap;
 }

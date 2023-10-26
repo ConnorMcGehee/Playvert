@@ -19,10 +19,18 @@
     display: flex;
 }
 
-#search {
+#playlist-link {
     align-self: center;
-    flex: 0.9;
+    width: clamp(17rem, 80%, 45rem);
+}
+
+#search {
     text-align: center;
+    width: 100%;
+}
+
+.move-up {
+    translate: 0 -1rem;
 }
 
 #search-container {
@@ -34,11 +42,12 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: end;
     gap: 1rem;
 }
 
 #convert {
-    flex: 0.1;
+    height: fit-content;
 }
 
 #convert-options {

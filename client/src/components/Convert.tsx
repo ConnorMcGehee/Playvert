@@ -133,7 +133,7 @@ function Convert() {
             }
             else if (playlistUrl.toLowerCase().includes("deezer")) {
                 if (playlistUrl.includes("page.link")) {
-                    playlistUrl = await ky(`/api/playlists/redirect-url?url=${encodeURIComponent(playlistUrl)}`).text();
+                    playlistUrl = await ky(`/api/playlists/redirect-url?url=${encodeURIComponent(playlistUrl)}`, { timeout: 60000 }).text();
                 }
                 const regex = /\/playlist\/(\d+)/;
                 const match = playlistUrl.match(regex);
@@ -215,13 +215,14 @@ function Convert() {
 
     return (
         <>
+            <h1>Converting Playlist</h1>
             {loadingStatus ? <>
                 {
                     loadingStatus !== NoPlaylistFoundMsg ?
                         <progress />
                         : null
                 }
-                <h3 className="loading-status">{loadingStatus}</h3>
+                <p className="loading-status">{loadingStatus}</p>
             </>
                 : null}
         </>

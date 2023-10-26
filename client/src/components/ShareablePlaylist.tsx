@@ -343,19 +343,16 @@ function ShareablePlaylist() {
         <>
             {playlist.tracks.length > 0 ? (
                 <>
-                    <a href={playlist.playlistUrl} target="_blank">
-                        <img src={playlist.imageUrl} style={{ width: "10rem" }} />
+                    <img src={playlist.imageUrl} alt={playlist.title + " artwork"} style={{ width: "10rem" }} />
+                    <h1>
+                        {playlist.title}
+                    </h1>
+                    <a href={playlist.playlistUrl} className="platform-link" target="_blank">
+                        {platformText()}
                     </a>
-                    <h2>
-                        <a href={playlist.playlistUrl} target="_blank">
-                            {playlist.title}
-                        </a>
-                    </h2>
                     {id ? <>
-                        <div className="input-icon-container">
-                            <input type="text" value={displayCopied ? "Copied to clipboard!" : shareLink} readOnly onClick={copyShareLink} className="share-link" />
-                            <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} />
-                        </div>
+                        <p onClick={copyShareLink} className="share-link">{displayCopied ? "Copied to clipboard!" : shareLink}
+                            <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} /></p>
                         <p>Shareable link expires in 24 hours</p>
                         <section className="save-buttons">
                             <button onClick={saveToSpotify}><FontAwesomeIcon className="small-icon" icon={faSpotify} /> Save to Spotify</button>
@@ -364,11 +361,6 @@ function ShareablePlaylist() {
                         </section>
                         <div className="save-progress">{renderSaveProgress()}</div>
                     </> : null}
-                    <div className="platform-link">
-                        <a href={playlist.playlistUrl} target="_blank">
-                            {platformText()}
-                        </a>
-                    </div>
                     {<section className="playlist-data">
                         {playlist.tracks.map((track, index) => {
                             const title = track.title;
@@ -389,8 +381,8 @@ function ShareablePlaylist() {
                             }
                             return (
                                 <a href={track.linkToSong} target="_blank" key={index}>
-                                    <figure><img src={track.coverArtUrl} />
-                                        <figcaption><h4>{title}</h4></figcaption>
+                                    <figure><img src={track.coverArtUrl} alt={track.title + " cover art"} />
+                                        <figcaption className="playlist-title">{title}</figcaption>
                                         <figcaption className="small">{artists}</figcaption>
                                     </figure>
                                 </a>
