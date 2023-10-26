@@ -117,7 +117,7 @@ await getBrowserInstance();
 
 console.log("Connecting to Redis...");
 
-const createRedisClient = () => createClient({
+const redisClient = createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
@@ -125,62 +125,34 @@ const createRedisClient = () => createClient({
   },
 });
 
-const maxRetries = 1000;
-let retryCount = 0;
+await redisClient.connect()
+  .then(() => {
+    console.log('Connected to Redis successfully.');
+    // Initialize store.
+    const redisStore = new RedisStore({
+      client: redisClient,
+      prefix: "playlist:"
+    });
+    // Initialize session storage.
+    app.use(
+      session({
+        store: redisStore,
+        resave: false, // required: force lightweight session keep alive (touch)
+        saveUninitialized: false, // recommended: only save session when data exists
+        secret: process.env.SESSION_SECRET!,
+        cookie: {
+          httpOnly: true,
+          maxAge: 14 * 24 * 60 * 60 * 1000,
+          sameSite: "none",
+          secure: isProductionEnv
+        }
+      })
+    );
+  })
+  .catch((error) => {
 
-let redisClient = createRedisClient();
-
-const connectWithRetry = () => {
-  return new Promise<void>((resolve, reject) => {
-    const attemptConnection = () => {
-
-      redisClient = createRedisClient();
-
-      redisClient.connect()
-        .then(() => {
-          console.log('Connected to Redis successfully.');
-          // Initialize store.
-          const redisStore = new RedisStore({
-            client: redisClient,
-            prefix: "playlist:"
-          });
-          // Initialize session storage.
-          app.use(
-            session({
-              store: redisStore,
-              resave: false, // required: force lightweight session keep alive (touch)
-              saveUninitialized: false, // recommended: only save session when data exists
-              secret: process.env.SESSION_SECRET!,
-              cookie: {
-                httpOnly: true,
-                maxAge: 14 * 24 * 60 * 60 * 1000,
-                sameSite: "none",
-                secure: isProductionEnv
-              }
-            })
-          );
-          resolve();
-        })
-        .catch((error) => {
-
-          retryCount++;
-
-          console.error(`Redis connection error: "${error}". Trying again in ${retryCount * 10} seconds...`);
-          if (retryCount < maxRetries) {
-            // Wait 1 second before attempting to reconnect
-            setTimeout(attemptConnection, 10000 * retryCount);
-          } else {
-            console.error(`Failed to connect to Redis after ${maxRetries} attempts.`);
-            reject(new Error('Failed to connect to Redis'));
-          }
-        });
-    };
-
-    attemptConnection();
+    console.error(`Redis connection error: "${error}"`);
   });
-};
-
-connectWithRetry();
 
 declare module 'express-session' {
   export interface Session {
