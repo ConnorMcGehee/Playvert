@@ -26,7 +26,7 @@ function Convert() {
             setLoadingStatus("Searching for playlist...");
             if (playlistUrl.toLowerCase().includes("spotify")) {
                 if (playlistUrl.toLowerCase().includes("spotify.link")) {
-                    playlistUrl = await ky(`/api/playlists/redirect-url?url=${encodeURIComponent(playlistUrl)}`).text();
+                    playlistUrl = await ky(`/api/playlists/redirect-url?url=${encodeURIComponent(playlistUrl)}`, { timeout: 60000 }).text();
                 }
                 const regex = /\/playlist\/(\w+)/;
                 const match = playlistUrl.match(regex);
