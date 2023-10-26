@@ -20,8 +20,6 @@ dotenv.config();
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log("Current directory:", __dirname);
-
 export const isProductionEnv = process.env.ENVIRONMENT === "prod";
 export const baseUrl = isProductionEnv ? "https://playvert.com" : "http://localhost:8888";
 
@@ -32,6 +30,8 @@ const client = new DynamoDBClient({
     secretAccessKey: process.env.AWS_SECRET_KEY!,
   },
 });
+
+console.log("Creating DynamoDB client...");
 
 export const dynamoDB = DynamoDBDocumentClient.from(client);
 
@@ -53,6 +53,8 @@ export const generateRandomString = function (length = 16) {
   return text;
 };
 
+console.log("Creating Express app...");
+
 const app = express();
 
 app.use(cors());
@@ -73,8 +75,11 @@ const config = {
   },
 };
 
+console.log("Setting up Auth0...");
+
 app.use(auth(config));
 
+console.log("Setting up Puppeteer...");
 
 let browser: puppeteer.Browser | null = null;
 const TIMEOUT_MS = 3600000;  // 1 hour in milliseconds
@@ -110,6 +115,8 @@ export const getBrowserInstance = async () => {
 
 await getBrowserInstance();
 
+console.log("Connecting to Redis...");
+
 const createRedisClient = () => createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
@@ -118,7 +125,7 @@ const createRedisClient = () => createClient({
   },
 });
 
-const maxRetries = 5;
+const maxRetries = 1000;
 let retryCount = 0;
 
 let redisClient = createRedisClient();
@@ -173,7 +180,7 @@ const connectWithRetry = () => {
   });
 };
 
-await connectWithRetry();
+connectWithRetry();
 
 declare module 'express-session' {
   export interface Session {
@@ -191,6 +198,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, './client/dist')));
 
 app.use(express.urlencoded({ extended: false }));
+
+console.log("Importing routes...")
 
 const routeFiles = fs.readdirSync(path.join(__dirname, '/server/routes'));
 // Note the use of Promise.all to wait for all dynamic imports
