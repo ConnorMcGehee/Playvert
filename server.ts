@@ -55,7 +55,7 @@ export const generateRandomString = function (length = 16) {
 
 console.log("Creating Express app...");
 
-const app = express();
+export const app = express();
 
 app.use(cors());
 
@@ -117,7 +117,7 @@ await getBrowserInstance();
 
 console.log("Connecting to Redis...");
 
-const redisClient = createClient({
+export const redisClient = createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
