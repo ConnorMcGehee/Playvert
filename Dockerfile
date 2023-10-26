@@ -1,5 +1,5 @@
 # Set the base image to Node 18
-FROM node:18
+FROM node:18.18.2
 
 # Update the repository sources list
 RUN apt-get update && apt-get upgrade -y
@@ -12,6 +12,8 @@ WORKDIR /app
 
 # Bundle your app source inside the docker image
 COPY . .
+
+RUN npm install -g npm@10.2.1
 
 # Install all the dependencies
 RUN npm ci
