@@ -115,7 +115,7 @@ const createRedisClient = () => createClient({
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
     port: 13380
-  }
+  },
 });
 
 const maxRetries = 5;
@@ -126,7 +126,6 @@ let redisClient = createRedisClient();
 const connectWithRetry = () => {
   return new Promise<void>((resolve, reject) => {
     const attemptConnection = () => {
-      console.log(`Attempting to connect to Redis (attempt ${retryCount + 1} of ${maxRetries})...`);
 
       redisClient = createRedisClient();
 
@@ -149,20 +148,20 @@ const connectWithRetry = () => {
                 httpOnly: true,
                 maxAge: 14 * 24 * 60 * 60 * 1000,
                 sameSite: "none",
-                secure: isProductionEnv ? true : false
+                secure: isProductionEnv
               }
             })
           );
           resolve();
         })
         .catch((error) => {
-          console.error('Redis connection error:', error);
 
           retryCount++;
 
+          console.error(`Redis connection error: "${error}". Trying again in ${retryCount * 10} seconds...`);
           if (retryCount < maxRetries) {
             // Wait 1 second before attempting to reconnect
-            setTimeout(attemptConnection, 1000);
+            setTimeout(attemptConnection, 10000 * retryCount);
           } else {
             console.error(`Failed to connect to Redis after ${maxRetries} attempts.`);
             reject(new Error('Failed to connect to Redis'));
