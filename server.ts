@@ -110,56 +110,6 @@ export const getBrowserInstance = async () => {
 
 await getBrowserInstance();
 
-declare module 'express-session' {
-  export interface Session {
-    spotify_access_token?: string;
-    spotify_refresh_token: string;
-    spotify_token_expiration_time: number;
-    redirect?: string;
-    state?: string;
-  }
-}
-
-app.set('trust proxy', 1)
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, './client/dist')));
-
-app.use(express.urlencoded({ extended: false }));
-
-const routeFiles = fs.readdirSync(path.join(__dirname, '/server/routes'));
-// Note the use of Promise.all to wait for all dynamic imports
-Promise.all(routeFiles.map(async (file) => {
-  if (file.startsWith(".DS_Store")) {
-    return Promise.resolve(); // resolve immediately for non-route files
-  }
-  const routerModule = await import(`./server/routes/${file}`);
-  const { path, router } = routerModule;
-  if (typeof router === 'function') {
-    app.use(path, router);
-  } else {
-    console.warn(`The 'router' export in ${file} is not a middleware function.`);
-  }
-})).then(() => {
-  // Define the catch-all route handler here, after all routes have been loaded
-  app.get('*', function (_req, res) {
-    res.sendFile(path.join(__dirname, './client/dist/index.html'), function (err) {
-      if (err) {
-        res.status(500).send(err)
-      }
-    })
-  });
-
-  app.listen(PORT, () => {
-    if (isProductionEnv) {
-      console.log(`HTTP Server up.`);
-    }
-    else {
-      console.log(`HTTP Server up. Now go to http://localhost:${PORT}/ in your browser.`);
-    }
-  });
-});
-
 const createRedisClient = () => createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
@@ -168,7 +118,7 @@ const createRedisClient = () => createClient({
   },
 });
 
-const maxRetries = 1000;
+const maxRetries = 5;
 let retryCount = 0;
 
 let redisClient = createRedisClient();
@@ -224,3 +174,53 @@ const connectWithRetry = () => {
 };
 
 await connectWithRetry();
+
+declare module 'express-session' {
+  export interface Session {
+    spotify_access_token?: string;
+    spotify_refresh_token: string;
+    spotify_token_expiration_time: number;
+    redirect?: string;
+    state?: string;
+  }
+}
+
+app.set('trust proxy', 1)
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.join(__dirname, './client/dist')));
+
+app.use(express.urlencoded({ extended: false }));
+
+const routeFiles = fs.readdirSync(path.join(__dirname, '/server/routes'));
+// Note the use of Promise.all to wait for all dynamic imports
+Promise.all(routeFiles.map(async (file) => {
+  if (file.startsWith(".DS_Store")) {
+    return Promise.resolve(); // resolve immediately for non-route files
+  }
+  const routerModule = await import(`./server/routes/${file}`);
+  const { path, router } = routerModule;
+  if (typeof router === 'function') {
+    app.use(path, router);
+  } else {
+    console.warn(`The 'router' export in ${file} is not a middleware function.`);
+  }
+})).then(() => {
+  // Define the catch-all route handler here, after all routes have been loaded
+  app.get('*', function (_req, res) {
+    res.sendFile(path.join(__dirname, './client/dist/index.html'), function (err) {
+      if (err) {
+        res.status(500).send(err)
+      }
+    })
+  });
+
+  app.listen(PORT, () => {
+    if (isProductionEnv) {
+      console.log(`HTTP Server up.`);
+    }
+    else {
+      console.log(`HTTP Server up. Now go to http://localhost:${PORT}/ in your browser.`);
+    }
+  });
+});
