@@ -111,11 +111,7 @@ export const getBrowserInstance = async () => {
 await getBrowserInstance();
 
 const createRedisClient = () => createClient({
-  password: process.env.REDIS_PASSWORD,
-  socket: {
-    host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
-    port: 13380
-  },
+  url: `redis://:${process.env.REDIS_PASSWORD}@redis-13380.c124.us-central1-1.gce.cloud.redislabs.com:13380`,
 });
 
 const maxRetries = 5;
