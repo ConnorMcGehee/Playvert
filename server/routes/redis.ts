@@ -1,5 +1,5 @@
 import express from "express";
-import * as controller from "../controllers/redis";
+import * as controller from "../controllers/redis.js";
 
 export const router = express.Router();
 export const path = "/redis";

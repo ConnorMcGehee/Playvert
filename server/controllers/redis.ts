@@ -1,5 +1,5 @@
 import session from "express-session";
-import { app, isProductionEnv, redisClient } from "../../server"
+import { app, isProductionEnv, redisClient } from "../../server.js"
 import RedisStore from "connect-redis";
 import { Request, Response } from "express";
 
