@@ -7,6 +7,7 @@ export const attemptRedisReconnect = async (req: Request, res: Response) => {
     if (req.body.password !== process.env.RECONNECT_REDIS_PASSWORD) {
         return res.status(401).send("Invalid password.");
     }
+
     redisClient.connect()
         .then(() => {
             // Initialize store.
