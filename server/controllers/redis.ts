@@ -8,6 +8,8 @@ export const attemptRedisReconnect = async (req: Request, res: Response) => {
         return res.status(401).send("Invalid password.");
     }
 
+    await redisClient.quit();
+
     redisClient.connect()
         .then(() => {
             // Initialize store.
