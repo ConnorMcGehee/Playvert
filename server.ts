@@ -117,7 +117,8 @@ await getBrowserInstance();
 
 console.log("Connecting to Redis...");
 
-export const redisClient = createClient({
+
+let redisClient = createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
     host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
@@ -125,34 +126,46 @@ export const redisClient = createClient({
   },
 });
 
-redisClient.connect()
-  .then(() => {
-    console.log('Connected to Redis successfully.');
-    // Initialize store.
-    const redisStore = new RedisStore({
-      client: redisClient,
-      prefix: "playlist:"
-    });
-    // Initialize session storage.
-    app.use(
-      session({
-        store: redisStore,
-        resave: false, // required: force lightweight session keep alive (touch)
-        saveUninitialized: false, // recommended: only save session when data exists
-        secret: process.env.SESSION_SECRET!,
-        cookie: {
-          httpOnly: true,
-          maxAge: 14 * 24 * 60 * 60 * 1000,
-          sameSite: "none",
-          secure: isProductionEnv
-        }
-      })
-    );
-  })
-  .catch((error) => {
-
-    console.error(`Redis connection error: "${error}"`);
+export const redisConnect = async () => {
+  redisClient = createClient({
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+      host: 'redis-13380.c124.us-central1-1.gce.cloud.redislabs.com',
+      port: 13380
+    },
   });
+
+  redisClient.connect()
+    .then(() => {
+      console.log('Connected to Redis successfully.');
+      // Initialize store.
+      const redisStore = new RedisStore({
+        client: redisClient,
+        prefix: "playlist:"
+      });
+      // Initialize session storage.
+      app.use(
+        session({
+          store: redisStore,
+          resave: false, // required: force lightweight session keep alive (touch)
+          saveUninitialized: false, // recommended: only save session when data exists
+          secret: process.env.SESSION_SECRET!,
+          cookie: {
+            httpOnly: true,
+            maxAge: 14 * 24 * 60 * 60 * 1000,
+            sameSite: "none",
+            secure: isProductionEnv
+          }
+        })
+      );
+    })
+    .catch((error) => {
+
+      console.error(`Redis connection error: "${error}"`);
+    });
+};
+
+redisConnect();
 
 declare module 'express-session' {
   export interface Session {

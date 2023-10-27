@@ -1,6 +1,4 @@
-import session from "express-session";
-import { app, isProductionEnv, redisClient } from "../../server.js"
-import RedisStore from "connect-redis";
+import { redisConnect } from "../../server.js"
 import { Request, Response } from "express";
 
 export const attemptRedisReconnect = async (req: Request, res: Response) => {
@@ -8,30 +6,8 @@ export const attemptRedisReconnect = async (req: Request, res: Response) => {
         return res.status(401).send("Invalid password.");
     }
 
-    await redisClient.quit();
-
-    redisClient.connect()
+    await redisConnect()
         .then(() => {
-            // Initialize store.
-            const redisStore = new RedisStore({
-                client: redisClient,
-                prefix: "playlist:"
-            });
-            // Initialize session storage.
-            app.use(
-                session({
-                    store: redisStore,
-                    resave: false, // required: force lightweight session keep alive (touch)
-                    saveUninitialized: false, // recommended: only save session when data exists
-                    secret: process.env.SESSION_SECRET!,
-                    cookie: {
-                        httpOnly: true,
-                        maxAge: 14 * 24 * 60 * 60 * 1000,
-                        sameSite: "none",
-                        secure: isProductionEnv
-                    }
-                })
-            );
             console.log('Connected to Redis successfully.');
             return res.send("Redis connected succesfully!");
         })
@@ -39,4 +15,6 @@ export const attemptRedisReconnect = async (req: Request, res: Response) => {
             console.error(`Redis connection error: "${error}"`);
             return res.status(500).send(error);
         });
+
+    return res.status(500).send("Could not reconnect to redis.");
 }
