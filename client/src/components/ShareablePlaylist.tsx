@@ -351,8 +351,8 @@ function ShareablePlaylist() {
                         {platformText()}
                     </a>
                     {id ? <>
-                        <p onClick={copyShareLink} className="share-link">{displayCopied ? "Copied to clipboard!" : shareLink}
-                            <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} /></p>
+                        <button onClick={copyShareLink} className="share-link">{displayCopied ? "Copied to clipboard!" : shareLink}
+                            <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} /></button>
                         <p>Shareable link expires in 24 hours</p>
                         <section className="save-buttons">
                             <button onClick={saveToSpotify}><FontAwesomeIcon className="small-icon" icon={faSpotify} /> Save to Spotify</button>

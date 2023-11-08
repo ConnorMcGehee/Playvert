@@ -3,6 +3,10 @@
         color: var(--link-hover-color);
         text-shadow: 0 0 0.25rem rgba(166, 234, 196, 0.333);
     }
+
+    .share-link:hover {
+        background: rgb(242, 255, 249);
+    }
 }
 
 .share-link {
