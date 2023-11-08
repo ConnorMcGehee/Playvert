@@ -135,7 +135,7 @@ export const redisConnect = async () => {
     },
   });
 
-  redisClient.connect()
+  await redisClient.connect()
     .then(() => {
       console.log('Connected to Redis successfully.');
       // Initialize store.
