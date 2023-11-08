@@ -165,7 +165,7 @@ export const redisConnect = async () => {
     });
 };
 
-redisConnect();
+await redisConnect();
 
 declare module 'express-session' {
   export interface Session {
