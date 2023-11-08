@@ -6,15 +6,12 @@ export const attemptRedisReconnect = async (req: Request, res: Response) => {
         return res.status(401).send("Invalid password.");
     }
 
-    await redisConnect()
-        .then(() => {
-            console.log('Connected to Redis successfully.');
-            return res.send("Redis connected succesfully!");
-        })
-        .catch((error) => {
-            console.error(`Redis connection error: "${error}"`);
-            return res.status(500).send(error);
-        });
-
-    return res.status(500).send("Could not reconnect to redis.");
+    try {
+        await redisConnect();
+        console.log('Connected to Redis successfully.');
+        return res.send("Redis connected successfully!");
+    } catch (error) {
+        console.error(`Redis connection error: "${error}"`);
+        return res.status(500).send((error as Error).message);
+    }
 }
