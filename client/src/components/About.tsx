@@ -5,7 +5,7 @@ function About() {
         <>
             <h1>About</h1>
             <p>
-                Hey! Playvert is a web app designed to make it easier to share music with your friends.
+                Hey! Playvert is a web app created by Connor McGehee. It's designed to make it easier to share music with your friends.
                 Currently it supports conversions of playlists between Spotify and Apple Music. I'm hoping to add support
                 for more platforms in the future, as well as converting individual songs, as well as a more
                 comprehensive playlist editor.

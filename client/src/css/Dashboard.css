@@ -24,6 +24,11 @@
     width: clamp(17rem, 80%, 45rem);
 }
 
+#playlist-link p {
+    position: absolute;
+    top: -1.2rem;
+}
+
 #search {
     text-align: center;
     width: 100%;
@@ -36,13 +41,14 @@
 #search-container {
     width: clamp(17rem, 90%, 55rem);
     margin: auto;
+    margin-top: 2.2rem;
     border-radius: var(--border-radius);
     background: rgb(223, 223, 223);
     background: radial-gradient(closest-side, rgba(223, 223, 223, 1) 0%, var(--background-color) 100%);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: end;
+    align-items: center;
     gap: 1rem;
 }
 

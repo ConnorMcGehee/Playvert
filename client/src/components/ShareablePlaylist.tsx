@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { Track, AppleTrack, Platform, Playlist, PlayvertAPIResponse, SpotifyTrack } from "./App";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "../css/ShareablePlaylist.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDeezer, faItunesNote, faSpotify } from "@fortawesome/free-brands-svg-icons";
@@ -25,6 +25,7 @@ function ShareablePlaylist() {
     const [displayCopied, setDisplayCopied] = useState(false);
     const [copiedTimeout, setCopiedTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [progress, setProgress] = useState(-1);
+    const shareLinkRef = useRef<HTMLButtonElement>(null);
 
     async function processTracks(tracks: Track[], convertFunction: ConvertFunction, chunkSize: number = 20): Promise<any[]> {
         const results: any[] = [];
@@ -351,13 +352,14 @@ function ShareablePlaylist() {
                         {platformText()}
                     </a>
                     {id ? <>
-                        <button onClick={copyShareLink} className="share-link">{displayCopied ? "Copied to clipboard!" : shareLink}
+                        <button ref={shareLinkRef} onClick={copyShareLink} aria-label="Copy shareable playlist link to clipboard" className="share-button">
+                            <p className="share-link">{displayCopied ? "Copied to clipboard!" : shareLink}</p>
                             <FontAwesomeIcon icon={faClipboard} className="copy-icon small-icon" onClick={copyShareLink} /></button>
                         <p>Shareable link expires in 24 hours</p>
                         <section className="save-buttons">
-                            <button onClick={saveToSpotify}><FontAwesomeIcon className="small-icon" icon={faSpotify} /> Save to Spotify</button>
-                            <button onClick={saveToApple}><FontAwesomeIcon className="small-icon" icon={faItunesNote} /> Save to Apple Music</button>
-                            {/* <button><FontAwesomeIcon className="small-icon" icon={faDeezer} /> Save to Deezer</button> */}
+                            <button className="save-button" onClick={saveToSpotify}><FontAwesomeIcon className="small-icon save-icon" icon={faSpotify} /> Save to Spotify</button>
+                            <button className="save-button" onClick={saveToApple}><FontAwesomeIcon className="small-icon save-icon" icon={faItunesNote} /> Save to Apple Music</button>
+                            {/* <button className="save-button"><FontAwesomeIcon className="small-icon" icon={faDeezer} /> Save to Deezer</button> */}
                         </section>
                         <div className="save-progress">{renderSaveProgress()}</div>
                     </> : null}
