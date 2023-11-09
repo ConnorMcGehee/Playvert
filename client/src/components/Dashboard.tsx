@@ -13,7 +13,7 @@ function Dashboard() {
 
     return (
         <>
-            <h1>Playvert</h1>
+            <h1 id="playvert-h1">Playvert</h1>
             <div id="dashboard">
                 <form id="search-form" action="">
                     <div id="search-container" className="move-up">
@@ -24,7 +24,7 @@ function Dashboard() {
                         <button onClick={(e) => convertPlaylist(e)} id="convert">Convert!</button>
                     </div>
                 </form>
-                <p className="move-up">Enter a playlist link from Spotify, Apple Music, or Deezer to get started.</p>
+                <p className="move-up">Enter a playlist link from Spotify or Apple Music to get started.</p>
             </div>
         </>
     )
